@@ -1,6 +1,9 @@
+AUI.add('aui-swf-util', function(A) {
 var Lang = A.Lang,
 	UA = A.UA,
-	getClassName = A.getClassName,
+	getClassName = A.ClassNameManager.getClassName,
+
+	CONFIG = A.config,
 
 	NAME = 'swf',
 
@@ -8,16 +11,16 @@ var Lang = A.Lang,
 	ATTR_EXPRESS_INSTALL_URL = 'http://fpdownload.macromedia.com/pub/flashplayer/update/current/swf/autoUpdater.swf?' + (+ new Date),
 	ATTR_TYPE = 'application/x-shockwave-flash',
 	ATTR_CLSID = 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-	ATTR_EVENT_HANDLER = 'YUI.AUI.SWF.eventHandler',
+	ATTR_EVENT_HANDLER = 'SWF.eventHandler',
 
 	SF = 'ShockwaveFlash',
 	VERSION = 0,
 
-	SWF_INSTANCES = YUI.AUI.namespace('SWF.instances'),
+	SWF_INSTANCES = YUI.AUI.namespace('_SWF.instances'),
 
 	CSS_SWF = getClassName(NAME);
 
-YUI.AUI.SWF.eventHandler = function(id, event) {
+YUI.AUI._SWF.eventHandler = function(id, event) {
 	SWF_INSTANCES[id]._eventHandler(event);
 };
 
@@ -116,16 +119,12 @@ var SWF = A.Component.create(
 			var instance = this;
 
 			if (arguments.length > 1) {
-				var boundingBox = arguments[0];
-				var url = arguments[1];
 				var params = arguments[2] || {};
 
-				config = {
-					boundingBox: boundingBox,
-					url: url,
-					fixedAttributes: params.fixedAttributes,
-					flashVars: params.flashVars
-				};
+				params.boundingBox = arguments[0];
+				params.url = arguments[1];
+
+				config = params;
 			}
 
 			SWF.superclass.constructor.call(this, config);
@@ -136,6 +135,32 @@ var SWF = A.Component.create(
 		},
 
 		isFlashVersionAtLeast: function(ver) {
+			var uaParts = String(VERSION).split('.');
+			var flashParts = String(ver).split('.');
+
+			var atLeast = false;
+
+			if (flashParts[0] == uaParts[0]) {
+				if (flashParts[1] == uaParts[1]) {
+					atLeast = flashParts[2] <= uaParts[2];
+				}
+				else {
+					atLeast = flashParts[1] < uaParts[1];
+				}
+			}
+			else {
+				atLeast = flashParts[0] == uaParts[0];
+			}
+
+			return atLeast;
+
+			if (flashMajor === uaMajor) {
+				if (flashMinor === uaMinor) {
+					return flashRev <= uaRev;
+				}
+				return flashMinor < uaMinor;
+			}
+			return flashMajor < uaMajor;
 			return VERSION >= ver;
 		},
 
@@ -156,7 +181,7 @@ var SWF = A.Component.create(
 					flashURL = ATTR_EXPRESS_INSTALL_URL;
 				}
 
-				var swfId = A.guid();
+				var swfId = A.guid('yuiswf');
 
 				SWF_INSTANCES[swfId] = this;
 
@@ -168,8 +193,10 @@ var SWF = A.Component.create(
 				A.mix(
 					flashVars,
 					{
-						YUISwfId: swfId,
-						YUIBridgeCallback: ATTR_EVENT_HANDLER
+						allowedDomain: CONFIG.doc.location.hostname,
+						yId: A.id,
+						YUIBridgeCallback: ATTR_EVENT_HANDLER,
+						YUISwfId: swfId
 					}
 				);
 
@@ -245,7 +272,7 @@ var SWF = A.Component.create(
 			_eventHandler: function(event) {
 				var instance = this;
 
-				var eventType = event.type.replace(/Event$/, '');
+				var eventType = event.type;
 
 				if (eventType != 'log') {
 					instance.fire(eventType, event);
@@ -255,4 +282,8 @@ var SWF = A.Component.create(
 	}
 );
 
+SWF.eventHandler = YUI.AUI._SWF.eventHandler;
+
 A.SWF = SWF;
+
+}, '@VERSION@' ,{skinnable:false, requires:['aui-base','querystring-stringify-simple']});
