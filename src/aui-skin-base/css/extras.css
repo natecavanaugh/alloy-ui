@@ -16,7 +16,7 @@ shadow or rounded corners.
 	box-shadow: 4px 4px 14px #777;
 }
 
-.aui-tab-active .aui-tab-label {
+.aui-tab-active .aui-tab-content {
 	box-shadow: 0px 0px 15px #575757 inset, 0px 0px 5px #222 inset;
 }
 
@@ -109,6 +109,7 @@ shadow or rounded corners.
 /* Top left */
 
 .aui-tabview-list,
+.aui-tabview-wrapper,
 .aui-image-viewer-bd,
 .aui-toolbar-vertical .aui-toolbar-first {
 	-moz-border-radius-topleft: 4px;
@@ -119,6 +120,7 @@ shadow or rounded corners.
 /* Top right */
 
 .aui-tabview-list,
+.aui-tabview-wrapper,
 .aui-image-viewer-bd,
 .aui-toolbar-vertical .aui-toolbar-first {
 	-moz-border-radius-topright: 4px;
