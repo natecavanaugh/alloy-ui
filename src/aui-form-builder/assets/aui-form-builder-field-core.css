@@ -8,6 +8,7 @@
 
 	-moz-border-radius: 6px;
 	-webkit-border-radius: 6px;
+	border-radius: 6px;
 }
 
 .aui-form-builder-drag-container .aui-form-builder-field:hover {
@@ -42,6 +43,7 @@
 
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
 
 .aui-form-builder-drop-container .aui-form-builder-field fieldset {
