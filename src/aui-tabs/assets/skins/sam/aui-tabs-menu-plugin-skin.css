@@ -1,22 +1,8 @@
-.aui-tabview-wrapper {
+.aui-tabview-wrapper, .aui-tabviewmenu-list-content {
+	background: #dbdcdc url(aui_sam_tabs_bg.png) repeat 0 0;
 	border: 1px solid #C8C9CA;
+	padding: 0 22px 0 4px;
 	margin-bottom: 1em;
-}
-
-.aui-tabview-wrapper .aui-tab-active:after {
-	border: 10px solid;
-	border-top-width: 0;
-	border-color: transparent transparent #fff;
-	bottom: -5px;
-	content: '-';
-	display: block;
-	height: 0;
-	left: 50%;
-	margin-left: -10px;
-	position: absolute;
-	text-indent: -9999px;
-	width: 0;
-	z-index: 20;
 }
 
 .aui-tabviewmenu-trigger {
@@ -50,8 +36,6 @@
 
 .aui-tabviewmenu-list-content {
 	background: #CCC9C9 url(../../../../../build/aui-skin-classic/images/menu/bg.png) repeat-x 0 0;
-	border: 1px solid;
-	border-color: #AEAFB1 #777879 #777879 #AEAFB1;
 	padding: 2px 0;
 }
 
