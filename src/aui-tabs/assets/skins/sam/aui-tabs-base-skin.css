@@ -13,8 +13,7 @@
 	margin: 0;
 }
 
-.aui-tabview-list .aui-state-default,
-.aui-tabview-list .aui-tab-active {
+.aui-tabview-list .aui-state-default, .aui-tabview-list .aui-tab-active {
 	border-width: 0;
 }
 
@@ -37,18 +36,19 @@
 	text-shadow: #fff 1px 1px 0px;
 }
 
-.aui-tab-content, .aui-tab-label, .aui-tab-label a {
+.aui-tab-label {
 	color: #1f1e1e;
 	display: inline-block;
-	text-decoration: none;
-}
-
-.aui-tab-label, a.aui-tab-label, span.aui-tab-label {
 	padding: 5px 10px 4px;
+	text-decoration: none;
 }
 
 .aui-tab-label:hover, .aui-state-hover .aui-tab-label {
 	color: #0066cc;
+}
+
+.aui-tab-disabled .aui-tab-label {
+	cursor: default;
 }
 
 .aui-tab-active {
@@ -62,7 +62,7 @@
 	border-color: #4b4b4b #4d4d4d;
 }
 
-.aui-tab-active .aui-tab-label, .aui-tab-active a, .aui-tab-active a:hover {
+.aui-tab-active .aui-tab-label, .aui-tab-active .aui-tab-label:hover, .aui-tab-active.aui-state-hover .aui-tab-label {
 	color: #fff;
 	text-shadow: #3a3a3a -1px -1px 0px;
 }
