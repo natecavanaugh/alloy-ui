@@ -162,6 +162,85 @@ A.extend(
 			return new instance.constructor(config);
 		},
 
+		getTPL: function(key) {
+			var instance = this;
+
+			var constructor = instance.constructor;
+
+			var tplObj = constructor.TPL;
+
+			var template = null;
+
+			if (!tplObj) {
+				tplObj = {};
+
+				constructor.TPL = tplObj;
+			}
+			else {
+				var html = tplObj[key];
+
+				if (html) {
+					template = html;
+
+					if (!A.instanceOf(html, A.Template)) {
+						template = new A.Template(html);
+
+						tplObj[key] = template;
+					}
+				}
+			}
+
+			return template;
+		},
+
+		renderTPL: function(key, renderedNode) {
+			var instance = this;
+
+			if (!renderedNode) {
+				var renderData = this.getAttrs(['cssClass'].concat(this._UI_ATTRS.SYNC));
+
+				renderedNode = instance.getTPL(key).render(renderData);
+			}
+
+			var constructor = instance.constructor;
+
+			var nodeParser = constructor.NODE_PARSER;
+
+			if (!nodeParser) {
+				nodeParser = {};
+
+				constructor.NODE_PARSER = nodeParser;
+			}
+			else {
+				var tplNodeParser = nodeParser[key];
+
+				if (tplNodeParser) {
+					for (var i in tplNodeParser) {
+						if (A.Object.owns(tplNodeParser, i)) {
+							var selector = tplNodeParser[i];
+							var node;
+
+							if (Lang.isString(selector)) {
+								node = renderedNode.one(selector);
+							}
+							else if (Lang.isArray(selector)) {
+								node = renderedNode.all(selector);
+							}
+							else if (Lang.isFunction(selector)) {
+								node = selector.call(instance, renderedNode);
+							}
+
+							if (node) {
+								instance[i + 'Node'] = node;
+							}
+						}
+					}
+				}
+			}
+
+			return renderedNode;
+		},
+
 		/**
 		 * Toggle the visibility of the Panel toggling the value of the
 	     * <a href="Widget.html#config_visible">visible</a> attribute.
@@ -381,6 +460,13 @@ Component.create = function(config) {
 				configProtoUIAttrs.SYNC = SYNC_UI_ATTRS;
 			}
 		}
+	}
+
+	var configTPL = config.TPL;
+	var extendsTPL = extendsClass.TPL;
+
+	if (configTPL && extendsTPL) {
+		A.mix(configTPL, extendsTPL);
 	}
 
 	var augmentsClasses = config.AUGMENTS;

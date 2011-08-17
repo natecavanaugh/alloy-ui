@@ -132,6 +132,8 @@ AUI().ready(
 			}
 		);
 
+		var Lang = A.Lang;
+
 		var testComponent = A.Component.create(
 			{
 				NAME: 'test',
@@ -142,10 +144,26 @@ AUI().ready(
 					},
 					myAttr2: {
 						value: ''
+					},
+					linkNode: {
+						value: null
 					}
 				},
 
 				UI_ATTRS: ['myAttr', 'myAttr2'],
+
+				TPL: {
+					render: ['<span class="my-attr-container"></span>',
+						'<a class="link" href="javascript:;">Set new value var myAttr2</a>'
+					]
+				},
+
+				NODE_PARSER: {
+					render: {
+						myAttrContainer: 'span.my-attr-container',
+						link: 'a.link'
+					}
+				},
 
 				prototype: {
 					initializer: function(){
@@ -155,19 +173,20 @@ AUI().ready(
 					renderUI: function() {
 						var instance = this;
 
-						instance._myAttrContainer = A.Node.create('<span></span>');
-						instance._link = A.Node.create('<a href="javascript:;">Set new value var myAttr2</a>');
-
+						// instance._myAttrContainer = A.Node.create('<span></span>');
+						// instance._link = A.Node.create('<a href="javascript:;">Set new value var myAttr2</a>');
+						// 
 						var contentBox = instance.get('contentBox');
 
-						contentBox.append(instance._myAttrContainer);
-						contentBox.append(instance._link);
+						var renderedNode = instance.renderTPL('render');
+
+						renderedNode.appendTo(contentBox);
 					},
 
 					bindUI: function() {
 						var instance = this;
 
-						instance._link.on('click', function(event) {
+						instance.linkNode.on('click', function(event) {
 							instance.set('myAttr2', parseInt(Math.random() * 100, 10));
 						});
 					},
@@ -175,7 +194,7 @@ AUI().ready(
 					_uiSetMyAttr: function(value) {
 						var instance = this;
 
-						instance._myAttrContainer.setContent(value);
+						instance.myAttrContainerNode.setContent(value);
 					},
 
 					_uiSetMyAttr2: function(value) {
@@ -187,8 +206,8 @@ AUI().ready(
 			}
 		);
 
-		// var testInstance = (new testComponent({myAttr: 'My Attr 1', myAttr2: 55})).render();
-
+		var testInstance = (new testComponent({myAttr: 'My Attr 1', myAttr2: 55})).render();
+window.testInstance = testInstance;
 		cmp = new A.Component(
 			{
 				cssClass: 'lfr-panel',
