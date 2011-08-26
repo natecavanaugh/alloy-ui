@@ -183,7 +183,18 @@ A.extend(
 					template = html;
 
 					if (!A.instanceOf(html, A.Template)) {
-						template = new A.Template(html);
+						var constructor = instance.constructor;
+						var tplNS = constructor._TPL_NS;
+
+						if (!tplNS) {
+							tplNS = A.getClassName(String(constructor.NAME).toLowerCase(), '');
+
+							constructor._TPL_NS = tplNS;
+						}
+
+						var config = instance._TPL_CONFIG || (instance._TPL_CONFIG = {$ns: tplNS});
+
+						template = new A.Template(html, config);
 
 						tplObj[key] = template;
 					}
@@ -199,39 +210,45 @@ A.extend(
 			if (!renderedNode) {
 				var renderData = this.getAttrs(['cssClass'].concat(this._UI_ATTRS.SYNC));
 
-				renderedNode = instance.getTPL(key).render(renderData);
+				var template = instance.getTPL(key);
+
+				if (template) {
+					renderedNode = template.render(renderData);
+				}
 			}
 
-			var constructor = instance.constructor;
+			if (renderedNode) {
+				var constructor = instance.constructor;
 
-			var nodeParser = constructor.NODE_PARSER;
+				var nodeParser = constructor.NODE_PARSER;
 
-			if (!nodeParser) {
-				nodeParser = {};
+				if (!nodeParser) {
+					nodeParser = {};
 
-				constructor.NODE_PARSER = nodeParser;
-			}
-			else {
-				var tplNodeParser = nodeParser[key];
+					constructor.NODE_PARSER = nodeParser;
+				}
+				else {
+					var tplNodeParser = nodeParser[key];
 
-				if (tplNodeParser) {
-					for (var i in tplNodeParser) {
-						if (A.Object.owns(tplNodeParser, i)) {
-							var selector = tplNodeParser[i];
-							var node;
+					if (tplNodeParser) {
+						for (var i in tplNodeParser) {
+							if (A.Object.owns(tplNodeParser, i)) {
+								var selector = tplNodeParser[i];
+								var node;
 
-							if (Lang.isString(selector)) {
-								node = renderedNode.one(selector);
-							}
-							else if (Lang.isArray(selector)) {
-								node = renderedNode.all(selector);
-							}
-							else if (Lang.isFunction(selector)) {
-								node = selector.call(instance, renderedNode);
-							}
+								if (Lang.isString(selector)) {
+									node = renderedNode.one(selector);
+								}
+								else if (Lang.isArray(selector)) {
+									node = renderedNode.all(selector);
+								}
+								else if (Lang.isFunction(selector)) {
+									node = selector.call(instance, renderedNode);
+								}
 
-							if (node) {
-								instance[i + 'Node'] = node;
+								if (node) {
+									instance[i + 'Node'] = node;
+								}
 							}
 						}
 					}
