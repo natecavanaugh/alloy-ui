@@ -80,7 +80,7 @@ var Lang = A.Lang,
 	STR_SPECIAL_NS = '$ns',
 	STR_SPECIAL_YNS = '$yns',
 	STR_RETURN = 'return ',
-	STR_WITHVALUES = 'with(values){ ',
+	STR_WITHVALUES = 'with(values || A._NOOP_OBJ){ ',
 	STR_WITHCLOSE = '; }',
 
 	STR_LANGSTRING_VAR = 'LString.',
@@ -131,6 +131,8 @@ var Lang = A.Lang,
 	YUI_NS = A.ClassNameManager.getClassName(STR_BLANK),
 
 	_INSTANCES = {};
+
+	A._NOOP_OBJ = {};
 
 	var Template = function(html, src) {
 		var instance = this;
