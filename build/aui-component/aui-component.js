@@ -121,6 +121,15 @@ Component.ATTRS = {
 	}
 };
 
+var TPL_ERROR = 'You must define a component template with this key: {templateKey} for this component: {componentName}';
+
+var MOCK_TEMPLATE = function() {};
+MOCK_TEMPLATE.prototype.render = MOCK_TEMPLATE.prototype.parse = function() {
+	var MISSING_TEMPLATE_ERROR = Lang.sub(TPL_ERROR, this);
+
+	throw new Error(MISSING_TEMPLATE_ERROR);
+};
+
 A.extend(
 	Component,
 	A.Widget,
@@ -172,6 +181,16 @@ A.extend(
 
 			var template = null;
 
+			var cls = constructor;
+			var superclass = cls.superclass;
+
+			while (!tplObj && superclass) {
+				cls.TPL = {};
+				cls = superclass.constructor;
+				superclass = cls.superclass;
+				tplObj = cls.TPL;
+			}
+
 			if (!tplObj) {
 				tplObj = {};
 
@@ -202,14 +221,28 @@ A.extend(
 				}
 			}
 
+			if (!template) {
+				template = new MOCK_TEMPLATE();
+
+				template.templateKey = key;
+				template.componentName = constructor.NAME;
+			}
+
 			return template;
 		},
 
-		renderTPL: function(key, renderedNode) {
+		renderTPL: function(key, renderData, renderedNode) {
 			var instance = this;
 
 			if (!renderedNode) {
-				var renderData = this.getAttrs(['cssClass'].concat(this._UI_ATTRS.SYNC));
+				var defRenderData = this.getAttrs(['cssClass'].concat(this._UI_ATTRS.SYNC));
+
+				if (!renderData) {
+					renderData = defRenderData;
+				}
+				else {
+					A.mix(renderData, defRenderData);
+				}
 
 				var template = instance.getTPL(key);
 
