@@ -62,28 +62,9 @@ var L = A.Lang,
 	CSS_RATING_LABEL_EL = getCN(RATING, LABEL, ELEMENT),
 	CSS_RATING_EL = getCN(RATING, ELEMENT),
 	CSS_RATING_EL_HOVER  = getCN(RATING, ELEMENT, HOVER),
-	CSS_RATING_EL_OFF = getCN(RATING, ELEMENT, OFF),
 	CSS_RATING_EL_ON = getCN(RATING, ELEMENT, ON),
 
-	TPL_LABEL = '<div class="'+CSS_RATING_LABEL_EL+'"></div>',
-	MAP_RATING_EL = {
-		tagName: 'a',
-		attrs: ''
-	},
-	MAP_RATING_EL_DISABLED = {
-		tagName: 'a',
-		attrs: 'href="'+HREF_JAVASCRIPT+'"'
-	},
-	TPL_RATING_EL = '<a href="'+HREF_JAVASCRIPT+'"></a>',
-	TPL_RATING_EL_DISABLED = '<span></span>',
-	TPL_RATING_CLASS_ATTR = ' class="' + CSS_RATING_EL + '"',
-	FN_GET_RATING_TPL = function(disabled) {
-		var map = disabled ? MAP_RATING_EL_DISABLED : MAP_RATING_EL;
-
-		var buffer = ['<',map.tagName, map.attrs, TPL_RATING_CLASS_ATTR, '>','</',map.tagName,'>'];
-
-		return buffer.join('');
-	};
+	TPL_LABEL = '<div class="'+CSS_RATING_LABEL_EL+'"></div>';
 
 /**
  * <p><img src="assets/images/aui-rating/main.png"/></p>
@@ -323,6 +304,19 @@ var Rating = A.Component.create(
 			labelNode: DOT+CSS_RATING_LABEL_EL
 		},
 
+		TPL: {
+			render: [
+				'<tpl loop="size">',
+					'<tpl if="!parent.disabled">',
+						'<a class="{$ns}element" href="javascript:;"></a>',
+					'</tpl>',
+					'<tpl if="parent.disabled">',
+						'<span class="{$ns}element"></span>',
+					'</tpl>',
+				'</tpl>'
+			]
+		},
+
 		prototype: {
 			/**
 			 * Construction logic executed during Rating instantiation. Lifecycle.
@@ -498,19 +492,14 @@ var Rating = A.Component.create(
 			 */
 			_createElements: function() {
 				var instance = this;
-				var elements = [];
 
-				var ratingTPL = FN_GET_RATING_TPL(instance.get(DISABLED));
-
-				for (var i = 0, size = this.get(SIZE); i < size; i++) {
-					elements.push(
-						ratingTPL
-					);
-				}
-
-				var elementFrag = A.DOM.create(elements.join(''));
-
-				return new A.NodeList(elementFrag.childNodes);
+				return instance.renderTPL(
+					'render',
+					{
+						disabled: instance.get(DISABLED),
+						size: instance.get(SIZE)
+					}
+				).get('childNodes');
 			},
 
 			/**
@@ -950,26 +939,20 @@ var ThumbRating = A.Component.create(
 		},
 
 		EXTENDS: Rating,
+		TPL: {
+			render: [
+				'<tpl loop="size">',
+					'<tpl if="!parent.disabled">',
+						'<a class="{$ans}rating-element {$ans}rating-element-off {$ans}rating-thumb-{[ $i == 0 ? "up" : "down" ]}" href="javascript:;"></a>',
+					'</tpl>',
+					'<tpl if="parent.disabled">',
+						'<span class="{$ans}rating-element {$ans}rating-element-off {$ans}rating-thumb-{[ $i == 0 ? "up" : "down" ]}"></span>',
+					'</tpl>',
+				'</tpl>',
+			]
+		},
 
 		prototype: {
-			/**
-			 * Create the DOM structure for the ThumbRating. Lifecycle.
-			 *
-			 * @method renderUI
-			 * @protected
-			 */
-			renderUI: function() {
-				var instance = this;
-
-				ThumbRating.superclass.renderUI.apply(this, arguments);
-
-				var elements = instance.get(ELEMENTS);
-
-				elements.addClass(CSS_RATING_EL_OFF);
-				elements.item(0).addClass(CSS_RATING_THUMB_UP);
-				elements.item(1).addClass(CSS_RATING_THUMB_DOWN);
-			},
-
 			/**
 			 * Add the <code>className</code> on the the <code>index</code> element
 		     * and all the previous Rating elements.
@@ -992,7 +975,7 @@ var ThumbRating = A.Component.create(
 			 * @method _syncElements
 			 * @protected
 			 */
-			_syncElements: function() {}
+			_syncElements: L.emptyFn
 		}
 	}
 );
@@ -1001,4 +984,4 @@ A.Rating = Rating;
 A.StarRating = Rating;
 A.ThumbRating = ThumbRating;
 
-}, '@VERSION@' ,{requires:['aui-base'], skinnable:true});
+}, '@VERSION@' ,{requires:['aui-base','aui-component'], skinnable:true});
