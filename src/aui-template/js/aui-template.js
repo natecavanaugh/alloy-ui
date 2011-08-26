@@ -4,11 +4,12 @@ var Lang = A.Lang,
 	isArray = Lang.isArray,
 	isDate = Lang.isDate,
 	isString = Lang.isString,
+	isNumber = Lang.isNumber,
 	isObject = Lang.isObject,
 	isValue = Lang.isValue,
 	isUndefined = Lang.isUndefined,
 
-	REGEX_TPL = /<tpl\b[^>]*?((for|if|exec)="([^"]+)")*?>((?:(?=([^<]+))\5|<(?!tpl\b[^>]*>))*?)<\/tpl>/,
+	REGEX_TPL = /<tpl\b[^>]*?((for|if|exec|loop)="([^"]+)")*?>((?:(?=([^<]+))\5|<(?!tpl\b[^>]*>))*?)<\/tpl>/,
 	REGEX_NEWLINE = /\r\n|\n/g,
 	REGEX_QUOTE = /'/g,
 	REGEX_QUOTE_ESCAPED = /\\'/g,
@@ -24,6 +25,7 @@ var Lang = A.Lang,
 	STR_FOR = 'for',
 	STR_EXEC = 'exec',
 	STR_IF = 'if',
+	STR_LOOP = 'loop',
 	STR_QUOTE = '\'',
 	STR_BRACE_OPEN = '{',
 	STR_BRACE_CLOSE = '}',
@@ -224,16 +226,39 @@ var Lang = A.Lang,
 					var subValues = values;
 
 					var tplFn = tpl.tplFn;
+					var loopFn = tpl.loopFn;
 
 					if (tplFn) {
 						subValues = tplFn.call(instance, values, parent);
 						parent = values;
 					}
 
-					if (tplFn && isArray(subValues)) {
-						var length = subValues.length;
+					if (loopFn || (tplFn && isArray(subValues))) {
+						var length = 0;
 
 						var execFn = tpl.execFn;
+
+						if (loopFn) {
+							length = loopFn.call(instance, values, parent, $index, $i, $count, $last, $ns, $ans, $yns);
+
+							if (!isNumber(length)) {
+								if (isString(length)) {
+									length = parseInt(length, 10);
+								}
+								if (isArray(length)) {
+									length = length.length;
+								}
+								else if (isObject(length)) {
+									length = A.Object.size(length);
+								}
+								else {
+									length = 0;
+								}
+							}
+						}
+						else {
+							length = subValues.length;
+						}
 
 						for (var i = 0; i < length; i++) {
 							var index = i + 1;
@@ -366,6 +391,7 @@ var Lang = A.Lang,
 			while (match = html.match(REGEX_TPL)) {
 				var testFn = null;
 				var execFn = null;
+				var loopFn = null;
 				var tplFn = null;
 				var expression = match[2];
 				var expressionValue = match[3];
@@ -409,6 +435,20 @@ var Lang = A.Lang,
 								STR_WITHVALUES + expressionValue + STR_WITHCLOSE
 							);
 						}
+						else if (expression == STR_LOOP) {
+							loopFn = new Function(
+								STR_VALUES,
+								STR_PARENT,
+								STR_SPECIAL_INDEX,
+								STR_SPECIAL_I,
+								STR_SPECIAL_COUNT,
+								STR_SPECIAL_LAST,
+								STR_SPECIAL_NS,
+								STR_SPECIAL_ANS,
+								STR_SPECIAL_YNS,
+								STR_WITHVALUES + STR_RETURN + expressionValue + STR_WITHCLOSE
+							);
+						}
 					}
 				}
 
@@ -422,7 +462,8 @@ var Lang = A.Lang,
 						id: id,
 						testFn: testFn,
 						tplBody: tplBody,
-						tplFn: tplFn
+						tplFn: tplFn,
+						loopFn: loopFn
 					}
 				);
 			}
