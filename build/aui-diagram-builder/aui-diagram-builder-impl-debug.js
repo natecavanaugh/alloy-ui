@@ -224,7 +224,6 @@ var DiagramBuilder = A.Component.create({
 			instance.handlerKeyDown = A.getDoc().on(KEYDOWN, A.bind(instance._afterKeyEvent, instance));
 
 			instance.dropContainer.delegate(CLICK, A.bind(instance._onNodeClick, instance), _DOT+CSS_DIAGRAM_NODE);
-			instance.dropContainer.delegate(DBLCLICK, A.bind(instance._onNodeEdit, instance), _DOT+CSS_DIAGRAM_NODE);
 			instance.dropContainer.delegate(MOUSEENTER, A.bind(instance._onMouseenterAnchors, instance), _DOT+CSS_DB_ANCHOR_NODE);
 			instance.dropContainer.delegate(MOUSELEAVE, A.bind(instance._onMouseleaveAnchors, instance), _DOT+CSS_DB_ANCHOR_NODE);
 		},
@@ -249,7 +248,7 @@ var DiagramBuilder = A.Component.create({
 
 		clearFields: function() {
 		    var instance = this;
-			
+
 			var fields = [];
 
 			instance.get(FIELDS).each(function(field) {
@@ -266,8 +265,10 @@ var DiagramBuilder = A.Component.create({
 		closeEditProperties: function() {
 			var instance = this;
 			var editingNode = instance.editingNode;
+			var tabView = instance.tabView;
 
-			instance.tabView.selectTab(A.DiagramBuilder.FIELDS_TAB);
+			tabView.selectTab(A.DiagramBuilder.FIELDS_TAB);
+			tabView.disableTab(A.DiagramBuilder.SETTINGS_TAB);
 
 			if (editingNode) {
 				editingNode.get(BOUNDING_BOX).removeClass(CSS_DIAGRAM_NODE_EDITING);
@@ -328,17 +329,35 @@ var DiagramBuilder = A.Component.create({
 		deleteConnectors: function(connectors) {
 			var instance = this;
 
-			AArray.each(connectors, function(connector) {
-				var anchor = connector.get(ANCHOR);
+			var strings = instance.getStrings();
 
-				if (anchor) {
-					var target = anchor.findConnectorTarget(connector);
+			var selectedConnectors = instance.getSelectedConnectors();
 
-					if (target) {
-						anchor.disconnect(target);
+			if (selectedConnectors.length && confirm(strings[DELETE_CONNECTORS_MESSAGE])) {
+				AArray.each(connectors, function(connector) {
+					var anchor = connector.get(ANCHOR);
+
+					if (anchor) {
+						var target = anchor.findConnectorTarget(connector);
+
+						if (target) {
+							anchor.disconnect(target);
+						}
 					}
+				});
+			}
+		},
+
+		deleteSelectedNode: function() {
+		    var instance = this;
+
+			var selectedNode = instance.selectedNode;
+
+			if (selectedNode) {
+				if (!selectedNode.get(REQUIRED)) {
+					selectedNode.close();
 				}
-			});
+			}
 		},
 
 		eachConnetor: function(fn) {
@@ -361,9 +380,11 @@ var DiagramBuilder = A.Component.create({
 			var instance = this;
 
 			if (connector) {
-				instance.closeEditProperties();
+				var tabView = instance.tabView;
 
-				instance.tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
+				instance.closeEditProperties();
+				tabView.enableTab(A.DiagramBuilder.SETTINGS_TAB);
+				tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
 
 				instance.propertyList.set(RECORDSET, connector.getProperties());
 
@@ -375,9 +396,11 @@ var DiagramBuilder = A.Component.create({
 			var instance = this;
 
 			if (diagramNode) {
-				instance.closeEditProperties();
+				var tabView = instance.tabView;
 
-				instance.tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
+				instance.closeEditProperties();
+				tabView.enableTab(A.DiagramBuilder.SETTINGS_TAB);
+				tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
 
 				instance.propertyList.set(RECORDSET, diagramNode.getProperties());
 
@@ -564,21 +587,10 @@ var DiagramBuilder = A.Component.create({
 
 		_onDeleteKey: function(event) {
 			var instance = this;
-			var strings = instance.getStrings();
 
-			var selectedConnectors = instance.getSelectedConnectors();
+			instance.deleteConnectors();
 
-			if (selectedConnectors.length && confirm(strings[DELETE_CONNECTORS_MESSAGE])) {
-				instance.deleteConnectors(selectedConnectors);
-			}
-
-			var selectedNode = instance.selectedNode;
-
-			if (selectedNode) {
-				if (!selectedNode.get(REQUIRED)) {
-					selectedNode.close();
-				}
-			}
+			instance.deleteSelectedNode();
 
 			event.halt();
 		},
@@ -608,6 +620,8 @@ var DiagramBuilder = A.Component.create({
 			var diagramNode = A.Widget.getByNode(event.currentTarget);
 
 			instance.select(diagramNode);
+
+			instance._onNodeEdit(event);
 		},
 
 		_onNodeEdit: function(event) {
@@ -806,7 +820,7 @@ var DiagramNode = A.Component.create({
 	EXTENDS: DiagramNodeOverlay,
 
 	buildNodeId: function(id) {
-		return DIAGRAM_NODE + _UNDERLINE + FIELD + _UNDERLINE + id;
+		return DIAGRAM_NODE + _UNDERLINE + FIELD + _UNDERLINE + id.replace(/[^a-z0-9.:_-]/ig, '_');
 	},
 
 	prototype: {

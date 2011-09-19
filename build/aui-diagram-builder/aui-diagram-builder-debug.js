@@ -69,7 +69,6 @@ var Lang = A.Lang,
 	TABVIEW = 'tabview',
 	TOOLBAR = 'toolbar',
 	TOOLBAR_CONTAINER = 'toolbarContainer',
-	UNIQUE = 'unique',
 
 	AgetClassName = A.getClassName,
 
@@ -87,7 +86,6 @@ var Lang = A.Lang,
 	CSS_DIAGRAM_BUILDER_FIELD_DRAGGABLE = AgetClassName(DIAGRAM, BUILDER, FIELD, DRAGGABLE),
 	CSS_DIAGRAM_BUILDER_FIELD_ICON = AgetClassName(DIAGRAM, BUILDER, FIELD, ICON),
 	CSS_DIAGRAM_BUILDER_FIELD_LABEL = AgetClassName(DIAGRAM, BUILDER, FIELD, LABEL),
-	CSS_DIAGRAM_BUILDER_BASE_FIELD_UNIQUE = AgetClassName(DIAGRAM, BUILDER, UNIQUE),
 	CSS_DIAGRAM_BUILDER_FIELDS_CONTAINER = AgetClassName(DIAGRAM, BUILDER, FIELDS, CONTAINER),
 	CSS_DIAGRAM_BUILDER_TAB_ADD = AgetClassName(DIAGRAM, BUILDER, TAB, ADD),
 	CSS_DIAGRAM_BUILDER_TAB_SETTINGS = AgetClassName(DIAGRAM, BUILDER, TAB, SETTINGS),
@@ -149,11 +147,6 @@ var AvailableField = A.Component.create({
 		type: {
 			value: NODE,
 			validator: isString
-		},
-
-		unique: {
-			value: false,
-			validator: isBoolean
 		}
 	},
 
@@ -168,7 +161,13 @@ var AvailableField = A.Component.create({
 	},
 
 	getAvailableFieldByNode: function(node) {
-		return A.one(node).getData(AVAILABLE_FIELD);
+		var node = A.one(node);
+
+		if (isNode(A.one(node))) {
+			return node.getData(AVAILABLE_FIELD)
+		}
+
+		return null;
 	},
 
 	prototype: {
@@ -199,10 +198,6 @@ var AvailableField = A.Component.create({
 
 			instance._uiSetLabel(
 				instance.get(LABEL)
-			);
-
-			instance._uiSetUnique(
-				instance.get(UNIQUE)
 			);
 		},
 
@@ -250,12 +245,6 @@ var AvailableField = A.Component.create({
 			var instance = this;
 
 			instance.labelNode.setContent(val);
-		},
-
-		_uiSetUnique: function(val) {
-			var instance = this;
-
-			instance.get(NODE).toggleClass(CSS_DIAGRAM_BUILDER_BASE_FIELD_UNIQUE, val);
 		}
 	}
 });
@@ -802,7 +791,6 @@ var DiagramBuilderBase = A.Component.create(
 A.DiagramBuilderBase = DiagramBuilderBase;
 
 }, '@VERSION@' ,{requires:['aui-tabs','aui-property-list','collection','dd'], skinnable:true});
-
 AUI.add('aui-diagram-builder-impl', function(A) {
 var Lang = A.Lang,
 	isArray = Lang.isArray,
@@ -1029,7 +1017,6 @@ var DiagramBuilder = A.Component.create({
 			instance.handlerKeyDown = A.getDoc().on(KEYDOWN, A.bind(instance._afterKeyEvent, instance));
 
 			instance.dropContainer.delegate(CLICK, A.bind(instance._onNodeClick, instance), _DOT+CSS_DIAGRAM_NODE);
-			instance.dropContainer.delegate(DBLCLICK, A.bind(instance._onNodeEdit, instance), _DOT+CSS_DIAGRAM_NODE);
 			instance.dropContainer.delegate(MOUSEENTER, A.bind(instance._onMouseenterAnchors, instance), _DOT+CSS_DB_ANCHOR_NODE);
 			instance.dropContainer.delegate(MOUSELEAVE, A.bind(instance._onMouseleaveAnchors, instance), _DOT+CSS_DB_ANCHOR_NODE);
 		},
@@ -1054,7 +1041,7 @@ var DiagramBuilder = A.Component.create({
 
 		clearFields: function() {
 		    var instance = this;
-			
+
 			var fields = [];
 
 			instance.get(FIELDS).each(function(field) {
@@ -1071,8 +1058,10 @@ var DiagramBuilder = A.Component.create({
 		closeEditProperties: function() {
 			var instance = this;
 			var editingNode = instance.editingNode;
+			var tabView = instance.tabView;
 
-			instance.tabView.selectTab(A.DiagramBuilder.FIELDS_TAB);
+			tabView.selectTab(A.DiagramBuilder.FIELDS_TAB);
+			tabView.disableTab(A.DiagramBuilder.SETTINGS_TAB);
 
 			if (editingNode) {
 				editingNode.get(BOUNDING_BOX).removeClass(CSS_DIAGRAM_NODE_EDITING);
@@ -1133,17 +1122,35 @@ var DiagramBuilder = A.Component.create({
 		deleteConnectors: function(connectors) {
 			var instance = this;
 
-			AArray.each(connectors, function(connector) {
-				var anchor = connector.get(ANCHOR);
+			var strings = instance.getStrings();
 
-				if (anchor) {
-					var target = anchor.findConnectorTarget(connector);
+			var selectedConnectors = instance.getSelectedConnectors();
 
-					if (target) {
-						anchor.disconnect(target);
+			if (selectedConnectors.length && confirm(strings[DELETE_CONNECTORS_MESSAGE])) {
+				AArray.each(connectors, function(connector) {
+					var anchor = connector.get(ANCHOR);
+
+					if (anchor) {
+						var target = anchor.findConnectorTarget(connector);
+
+						if (target) {
+							anchor.disconnect(target);
+						}
 					}
+				});
+			}
+		},
+
+		deleteSelectedNode: function() {
+		    var instance = this;
+
+			var selectedNode = instance.selectedNode;
+
+			if (selectedNode) {
+				if (!selectedNode.get(REQUIRED)) {
+					selectedNode.close();
 				}
-			});
+			}
 		},
 
 		eachConnetor: function(fn) {
@@ -1166,9 +1173,11 @@ var DiagramBuilder = A.Component.create({
 			var instance = this;
 
 			if (connector) {
-				instance.closeEditProperties();
+				var tabView = instance.tabView;
 
-				instance.tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
+				instance.closeEditProperties();
+				tabView.enableTab(A.DiagramBuilder.SETTINGS_TAB);
+				tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
 
 				instance.propertyList.set(RECORDSET, connector.getProperties());
 
@@ -1180,9 +1189,11 @@ var DiagramBuilder = A.Component.create({
 			var instance = this;
 
 			if (diagramNode) {
-				instance.closeEditProperties();
+				var tabView = instance.tabView;
 
-				instance.tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
+				instance.closeEditProperties();
+				tabView.enableTab(A.DiagramBuilder.SETTINGS_TAB);
+				tabView.selectTab(A.DiagramBuilder.SETTINGS_TAB);
 
 				instance.propertyList.set(RECORDSET, diagramNode.getProperties());
 
@@ -1369,21 +1380,10 @@ var DiagramBuilder = A.Component.create({
 
 		_onDeleteKey: function(event) {
 			var instance = this;
-			var strings = instance.getStrings();
 
-			var selectedConnectors = instance.getSelectedConnectors();
+			instance.deleteConnectors();
 
-			if (selectedConnectors.length && confirm(strings[DELETE_CONNECTORS_MESSAGE])) {
-				instance.deleteConnectors(selectedConnectors);
-			}
-
-			var selectedNode = instance.selectedNode;
-
-			if (selectedNode) {
-				if (!selectedNode.get(REQUIRED)) {
-					selectedNode.close();
-				}
-			}
+			instance.deleteSelectedNode();
 
 			event.halt();
 		},
@@ -1413,6 +1413,8 @@ var DiagramBuilder = A.Component.create({
 			var diagramNode = A.Widget.getByNode(event.currentTarget);
 
 			instance.select(diagramNode);
+
+			instance._onNodeEdit(event);
 		},
 
 		_onNodeEdit: function(event) {
@@ -1611,7 +1613,7 @@ var DiagramNode = A.Component.create({
 	EXTENDS: DiagramNodeOverlay,
 
 	buildNodeId: function(id) {
-		return DIAGRAM_NODE + _UNDERLINE + FIELD + _UNDERLINE + id;
+		return DIAGRAM_NODE + _UNDERLINE + FIELD + _UNDERLINE + id.replace(/[^a-z0-9.:_-]/ig, '_');
 	},
 
 	prototype: {
@@ -2211,7 +2213,6 @@ A.DiagramNodeTask = A.Component.create({
 A.DiagramBuilder.types[TASK] = A.DiagramNodeTask;
 
 }, '@VERSION@' ,{requires:['aui-diagram-builder-base','overlay'], skinnable:true});
-
 AUI.add('aui-diagram-builder-connector', function(A) {
 var Lang = A.Lang,
 	isArray = Lang.isArray,
@@ -3058,6 +3059,5 @@ A.Anchor = A.Base.create('anchor', A.Base, [], {
 }, '@VERSION@' ,{requires:['aui-base','arraylist-add','arraylist-filter','json','graphics','dd'], skinnable:true});
 
 
-
-AUI.add('aui-diagram-builder', function(A){}, '@VERSION@' ,{skinnable:true, use:['aui-diagram-builder-base','aui-diagram-builder-impl','aui-diagram-builder-connector']});
+AUI.add('aui-diagram-builder', function(A){}, '@VERSION@' ,{use:['aui-diagram-builder-base','aui-diagram-builder-impl','aui-diagram-builder-connector'], skinnable:true});
 
