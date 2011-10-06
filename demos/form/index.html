@@ -687,7 +687,7 @@
 </div>
 
 <script type="text/javascript" charset="utf-8">
-
+console.clear();
 AUI().ready(
 	'aui-form-base',
 	'event-valuechange',
@@ -833,6 +833,11 @@ AUI().ready(
 var Lang = A.Lang,
 	isString = Lang.isString,
 	Event = A.Event,
+	LString = Lang.String,
+
+	CONFIG_CAPTURE = {
+		capture: true,
+	},
 
 	USE_ACTIVATE = Lang.isFunction(A.DOM.create('<p onbeforeactivate=";"/>').onbeforeactivate),
 	REGEX_BUTTON = /^(?:input|button)$/i;
@@ -844,21 +849,36 @@ var EventSupport = function(config) {
 	var proxy = config.proxy;
 	var type = config.type;
 
-	var nodeDataKey = '_' + type + 'Notifiers';
-	var nodeAttachedKey = '_' + type + 'Attached';
-	var nodeSubKey = '_' + type + 'SubKey';
+	var prefix = LString.prefix('_', type);
 
-	var MAP_CHANGED = {};
+	var	MAP_CHANGED = {};
+
+	var nodeDataKey = prefix + 'Notifiers';
+	var nodeAttachedKey = prefix + 'Attached';
+	var nodeSubKey = prefix + 'SubKey';
 
 	var eventDef = {
 		delegate: function (node, sub, notifier, filter) {
 			var instance = this;
 
-			if (isString(filter)) {
-				sub.filter = Y.delegate.compileFilter(filter);
+			var handle;
+
+			var el = node._node;
+
+			if (!A.DOM.isWindow(el)) {
+				if (isString(filter)) {
+					sub.filter = Y.delegate.compileFilter(filter);
+				}
+
+				sub._HANDLES = [];
+
+				handle = instance._delegate(el, notifier, true);
+			}
+			else {
+				handle = instance._directAttach(el, notifier);
 			}
 
-			sub.delegateHandle = this._attach(node._node, notifier, true);
+			sub.delegateHandle = handle;
 		},
 
 		detach: function (node, sub) {
@@ -871,57 +891,146 @@ var EventSupport = function(config) {
 			var instance = this;
 
 			sub.delegateHandle.detach();
+
+			var handles = sub._HANDLES;
+
+			var length = handles.length;
+
+			while (length--) {
+				handles[length].detach();
+			}
+
+			handles.length = 0;
 		},
 
 		on: function (node, sub, notifier) {
 			var instance = this;
 
-			sub.onHandle = this._attach(node._node, notifier);
+			sub.onHandle = instance._directAttach(node._node, notifier);
 		},
 
-		_attach: function (el, notifier, delegate) {
+		_directAttach: function(el, notifier) {
+			var instance = this;
+
+			var elType = el.type;
+
+			if (type == 'change' && (elType == 'radio' || elType == 'checkbox')) {
+				var propertyChangeArgs = ['propertychange', A.rbind(instance._onPropChangeFn, instance, el), el];
+				var clickArgs = ['click', A.rbind(instance._onClickFn, instance, el, notifier), el];
+
+				var handles = [
+					Event._attach(propertyChangeArgs, CONFIG_CAPTURE),
+					Event._attach(clickArgs, CONFIG_CAPTURE)
+				];
+
+				handle = new Y.EventHandle(handles);
+			}
+			else {
+				handle = Event._attach([type, notifier.fire, el, notifier]);
+			}
+		},
+
+		_delegate: function (el, notifier) {
 			var instance = this;
 
 			var handle;
 
-			var captureConfig = {
-				capture: true
-			};
+			var handles = [];
+			var proxyType = proxy.split(' ');
 
-			if (!delegate || A.DOM.isWindow(el)) {
-				var elType = el.type;
+			var fixedArgs = [null, instance._delegateProxyFn, el, instance, notifier];
 
-				if (type == 'change' && (elType == 'radio' || elType == 'checkbox')) {
-					var propertyChangeArgs = ['propertychange', A.rbind(instance._onPropChangeFn, instance, el), el];
-					var clickArgs = ['click', A.rbind(instance._onClickFn, instance, el, notifier), el];
+			for (var i = 0, length = proxyType.length; i < length; i++) {
+				fixedArgs[0] = proxyType[i];
 
-					var handles = [
-						Event._attach(propertyChangeArgs, captureConfig),
-						Event._attach(clickArgs, captureConfig)
-					];
-
-					handle = new Y.EventHandle(handles);
-				}
-				else {
-					handle = Event._attach([type, notifier.fire, el, notifier]);
-				}
+				handles[i] = Event._attach(fixedArgs, CONFIG_CAPTURE);
 			}
-			else {
-				var handles = [];
-				var proxyType = proxy.split(' ');
 
-				var fixedArgs = [null, instance._proxyFn, el, instance, notifier, delegate];
-
-				for (var i = 0, length = proxyType.length; i < length; i++) {
-					fixedArgs[0] = proxyType[i];
-
-					handles[i] = Event._attach(fixedArgs, captureConfig);
-				}
-
-				handle = new Y.EventHandle(handles);
-			}
+			handle = new Y.EventHandle(handles);
 
 			return handle;
+		},
+
+		_delegateProxyFn: function (event, notifier) {
+			var instance = this;
+
+			var target = event.target;
+
+			var node = target;
+
+			var el = node._node;
+
+			if (type == 'submit') {
+				if (REGEX_BUTTON.test(el.nodeName)) {
+					node = node.get('form');
+				}
+				else {
+					node = null;
+				}
+			}
+
+			if (node) {
+				var storedNotifiers = node.getData(nodeDataKey);
+
+				var currentTarget = event.currentTarget;
+
+				var guid = A.stamp(currentTarget._node);
+
+				var defer = (USE_ACTIVATE || target != currentTarget);
+
+				var sub = notifier.handle.sub;
+
+				var filterArgs = [node, event].concat(sub.args || []);
+
+				var directSub;
+
+				notifier.currentTarget = node;
+				notifier.container = currentTarget;
+
+				if ((!sub.filter || sub.filter.apply(node, filterArgs)) && !node.getData(nodeAttachedKey)) {
+					if (!storedNotifiers) {
+						storedNotifiers = {};
+
+						node.setData(nodeDataKey, storedNotifiers);
+
+						if (defer) {
+							var handle;
+							var elType = el.type;
+
+							if (type == 'change' && (elType == 'radio' || elType == 'checkbox')) {
+								var propertyChangeArgs = ['propertychange', A.rbind(instance._onPropChangeFn, instance, el), el];
+								var clickArgs = ['click', A.rbind(instance._onClickFn, instance, el, true), el];
+
+								notifier.handle.sub._HANDLES.push(
+									Event._attach(propertyChangeArgs, CONFIG_CAPTURE),
+									Event._attach(clickArgs, CONFIG_CAPTURE)
+								);
+							}
+
+							handle = Event._attach([directEvent, instance._notify, node._node]);
+
+							directSub = handle.sub;
+							// directSub.once = true;
+
+							node.setData(nodeSubKey, handle);
+						}
+					}
+
+					var notifiersCollection = storedNotifiers[guid];
+
+					if (!notifiersCollection) {
+						notifiersCollection = storedNotifiers[guid] = [];
+					}
+
+					notifiersCollection.push(notifier);
+
+					if (!defer) {
+						instance._notify(event);
+					}
+
+					node.setData(nodeAttachedKey, true);
+				}
+			}
 		},
 
 		_onClickFn: function(event, el, notifier) {
@@ -930,7 +1039,7 @@ var EventSupport = function(config) {
 			var guid = A.stamp(el);
 
 			if (MAP_CHANGED[guid]) {
-				MAP_CHANGED[guid] = false;
+				delete MAP_CHANGED[guid];
 
 				instance._notify(event, null, notifier);
 			}
@@ -956,7 +1065,7 @@ var EventSupport = function(config) {
 
 			var notifiers = [];
 
-			var notifier = keepNotifiers;
+			var notifier = !Lang.isBoolean(keepNotifiers) && keepNotifiers;
 
 			if (storedNotifiers) {
 				var notifiersCollection;
@@ -1003,75 +1112,6 @@ var EventSupport = function(config) {
 				else {
 					// node.clearData(nodeDataKey);
 					// node.clearData(nodeAttachedKey);
-				}
-			}
-		},
-
-		_proxyFn: function (event, notifier, delegate) {
-			var instance = this;
-
-			var target = event.target;
-
-			var node = target;
-
-			var el = node._node;
-
-			if (type == 'submit') {
-				if (REGEX_BUTTON.test(el.nodeName)) {
-					node = node.get('form');
-				}
-				else {
-					node = null;
-				}
-			}
-
-			if (node) {
-				var storedNotifiers = node.getData(nodeDataKey);
-
-				var currentTarget = event.currentTarget;
-
-				var guid = A.stamp(currentTarget._node);
-
-				var defer = (USE_ACTIVATE || target != currentTarget);
-
-				var sub = notifier.handle.sub;
-
-				var filterArgs = [node, event].concat(sub.args || []);
-
-				var directSub;
-
-				notifier.currentTarget = delegate ? node : currentTarget;
-				notifier.container = delegate ? currentTarget : null;
-
-				if ((!sub.filter || sub.filter.apply(node, filterArgs)) && !node.getData(nodeAttachedKey)) {
-					if (!storedNotifiers) {
-						storedNotifiers = {};
-
-						node.setData(nodeDataKey, storedNotifiers);
-
-						if (defer) {
-							var handle = Event._attach([directEvent, instance._notify, node._node]);
-
-							directSub = handle.sub;
-							// directSub.once = true;
-
-							node.setData(nodeSubKey, handle);
-						}
-					}
-
-					var notifiersCollection = storedNotifiers[guid];
-
-					if (!notifiersCollection) {
-						notifiersCollection = storedNotifiers[guid] = [];
-					}
-
-					notifiersCollection.push(notifier);
-
-					if (!defer) {
-						instance._notify(event);
-					}
-
-					node.setData(nodeAttachedKey, true);
 				}
 			}
 		}
@@ -1314,10 +1354,10 @@ if (USE_ACTIVATE) {
 			},
 			'h1'
 		);
-
-		A.all(':input').on('change', function(event) {
-			console.log('no del ', event.currentTarget.val(), '---', String(A.Lang.now()).slice(-4));
-		})
+		// 
+		// A.all(':input').on('change', function(event) {
+		// 	console.log('no del ', event.currentTarget.val(), '---', String(A.Lang.now()).slice(-4));
+		// })
 
 		A.getBody().delegate('submit', function(event) {
 			console.log('--delegated SUBMIT--');
