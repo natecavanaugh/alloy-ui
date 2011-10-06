@@ -853,9 +853,9 @@ var EventSupport = function(config) {
 
 	var	MAP_CHANGED = {};
 
-	var nodeDataKey = prefix + 'Notifiers';
-	var nodeAttachedKey = prefix + 'Attached';
-	var nodeSubKey = prefix + 'SubKey';
+	var NODE_DATA_KEY = prefix + 'Notifiers';
+	var NODE_ATTACHED_KEY = prefix + 'Attached';
+	var NODE_SUB_KEY = prefix + 'SubKey';
 
 	var eventDef = {
 		delegate: function (node, sub, notifier, filter) {
@@ -871,6 +871,7 @@ var EventSupport = function(config) {
 				}
 
 				sub._HANDLES = [];
+				sub._NODES = [];
 
 				handle = instance._delegate(el, notifier, true);
 			}
@@ -893,14 +894,26 @@ var EventSupport = function(config) {
 			sub.delegateHandle.detach();
 
 			var handles = sub._HANDLES;
+			var nodes = sub._NODES;
 
-			var length = handles.length;
+			var handlesLength = handles.length;
+			var nodesLength = nodes.length;
 
-			while (length--) {
-				handles[length].detach();
+			while (handlesLength--) {
+				handles[handlesLength].detach();
+			}
+
+			var item;
+
+			while (nodesLength--) {
+				item = nodes[nodesLength];
+
+				item.clearData(NODE_DATA_KEY);
+				item.clearData(NODE_ATTACHED_KEY);
 			}
 
 			handles.length = 0;
+			nodes.length = 0;
 		},
 
 		on: function (node, sub, notifier) {
@@ -970,13 +983,9 @@ var EventSupport = function(config) {
 			}
 
 			if (node) {
-				var storedNotifiers = node.getData(nodeDataKey);
-
 				var currentTarget = event.currentTarget;
 
 				var guid = A.stamp(currentTarget._node);
-
-				var defer = (USE_ACTIVATE || target != currentTarget);
 
 				var sub = notifier.handle.sub;
 
@@ -987,33 +996,37 @@ var EventSupport = function(config) {
 				notifier.currentTarget = node;
 				notifier.container = currentTarget;
 
-				if ((!sub.filter || sub.filter.apply(node, filterArgs)) && !node.getData(nodeAttachedKey)) {
+				if ((!sub.filter || sub.filter.apply(node, filterArgs)) && !node.getData(NODE_ATTACHED_KEY)) {
+					sub._NODES.push(node);
+
+					var storedNotifiers = node.getData(NODE_DATA_KEY);
+
 					if (!storedNotifiers) {
 						storedNotifiers = {};
 
-						node.setData(nodeDataKey, storedNotifiers);
+						node.setData(NODE_DATA_KEY, storedNotifiers);
 
-						if (defer) {
-							var handle;
-							var elType = el.type;
+						var handle;
+						var elType = el.type;
 
-							if (type == 'change' && (elType == 'radio' || elType == 'checkbox')) {
-								var propertyChangeArgs = ['propertychange', A.rbind(instance._onPropChangeFn, instance, el), el];
-								var clickArgs = ['click', A.rbind(instance._onClickFn, instance, el, true), el];
+						if (type == 'change' && (elType == 'radio' || elType == 'checkbox')) {
+							var propertyChangeArgs = ['propertychange', A.rbind(instance._onPropChangeFn, instance, el), el];
+							var clickArgs = ['click', A.rbind(instance._onClickFn, instance, el, true), el];
 
-								notifier.handle.sub._HANDLES.push(
-									Event._attach(propertyChangeArgs, CONFIG_CAPTURE),
-									Event._attach(clickArgs, CONFIG_CAPTURE)
-								);
-							}
-
-							handle = Event._attach([directEvent, instance._notify, node._node]);
-
-							directSub = handle.sub;
-							// directSub.once = true;
-
-							node.setData(nodeSubKey, handle);
+							notifier.handle.sub._HANDLES.push(
+								Event._attach(propertyChangeArgs, CONFIG_CAPTURE),
+								Event._attach(clickArgs, CONFIG_CAPTURE)
+							);
 						}
+
+						handle = Event._attach([directEvent, instance._notify, node._node]);
+
+						directSub = handle.sub;
+						// directSub.once = true;
+
+						node.setData(NODE_SUB_KEY, handle);
+
+						notifier.handle.sub._HANDLES.push(handle);
 					}
 
 					var notifiersCollection = storedNotifiers[guid];
@@ -1024,11 +1037,7 @@ var EventSupport = function(config) {
 
 					notifiersCollection.push(notifier);
 
-					if (!defer) {
-						instance._notify(event);
-					}
-
-					node.setData(nodeAttachedKey, true);
+					node.setData(NODE_ATTACHED_KEY, true);
 				}
 			}
 		},
@@ -1057,11 +1066,11 @@ var EventSupport = function(config) {
 			var instance = this;
 
 			var node = event.currentTarget;
-			var target = node;
+			var target = node._node;
 
-			var doc = node.get('ownerDocument') || node;
+			var doc = target.ownerDocument || node;
 
-			var storedNotifiers = node.getData(nodeDataKey);
+			var storedNotifiers = node.getData(NODE_DATA_KEY);
 
 			var notifiers = [];
 
@@ -1077,7 +1086,7 @@ var EventSupport = function(config) {
 						notifiers.push.apply(notifiers,  notifiersCollection);
 					}
 
-					target = target.get('parentNode');
+					target = target.parentNode;
 				}
 
 				notifiersCollection = storedNotifiers[A.stamp(doc)];
@@ -1103,15 +1112,15 @@ var EventSupport = function(config) {
 				}
 
 				if (keepNotifiers) {
-					var directSub = node.getData(nodeSubKey);
+					var directSub = node.getData(NODE_SUB_KEY);
 
 					if (directSub) {
 						directSub.detach();
 					}
 				}
 				else {
-					// node.clearData(nodeDataKey);
-					// node.clearData(nodeAttachedKey);
+					// node.clearData(NODE_DATA_KEY);
+					// node.clearData(NODE_ATTACHED_KEY);
 				}
 			}
 		}
@@ -1341,6 +1350,29 @@ if (USE_ACTIVATE) {
 			},
 			'input,textarea,select'
 		);
+		A.getBody().delegate(
+			'change',
+			function(event) {
+				console.log('--2 this was a delegated change', event.currentTarget.val(), '---', String(A.Lang.now()).slice(-4));
+			},
+			'input,textarea,select'
+		);
+		// 
+		// A.getBody().delegate(
+		// 	'click',
+		// 	function(event) {
+		// 		console.log('1 hello');
+		// 	},
+		// 	'.aui-field-label'
+		// );
+		// 
+		// A.getBody().delegate(
+		// 	'click',
+		// 	function(event) {
+		// 		console.log('2 hello');
+		// 	},
+		// 	'.aui-field-label'
+		// );
 
 		A.getBody().delegate(
 			'click',
