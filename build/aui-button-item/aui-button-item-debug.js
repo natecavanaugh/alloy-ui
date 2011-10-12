@@ -15,6 +15,7 @@ var Lang = A.Lang,
 	BOUNDING_BOX = 'boundingBox',
 	BUTTON = 'button',
 	CONTENT_BOX = 'contentBox',
+	DISABLED = 'disabled',
 	DOT = '.',
 	HANDLER = 'handler',
 	ICON = 'icon',
@@ -131,6 +132,17 @@ var ButtonItem = A.Component.create(
 			 * @type Boolean
 			 */
 			defaultState: {},
+
+			/**
+			 * Whether to apply the disabled attribute to the button
+			 *
+			 * @attribute disabled
+			 * @default true
+			 * @type Boolean
+			 */
+			disabled: {
+				value: false
+			},
 
 			/**
 			 * An event callback to handle when a user interacts with the button.
@@ -409,22 +421,43 @@ var ButtonItem = A.Component.create(
 			_renderStates: function(event) {
 				var instance = this;
 
-				var parent = instance.get('parent');
+				var disabled = instance.get(DISABLED);
 
-				var activeState = instance._getState('activeState', parent);
-				var classNames = instance._getState('classNames', parent);
-				var defaultState = instance._getState('defaultState', parent);
-				var hoverState = instance._getState('hoverState', parent);
+				if (disabled == true) {
+					instance._setDisabled();
+				}
+				else {
+					var parent = instance.get('parent');
 
-				instance.plug(
-					A.Plugin.StateInteraction,
-					{
-						activeState: activeState,
-						classNames: classNames,
-						defaultState: defaultState,
-						hoverState: hoverState
-					}
-				);
+					var activeState = instance._getState('activeState', parent);
+					var classNames = instance._getState('classNames', parent);
+					var defaultState = instance._getState('defaultState', parent);
+					var hoverState = instance._getState('hoverState', parent);
+
+					instance.plug(
+						A.Plugin.StateInteraction,
+						{
+							activeState: activeState,
+							classNames: classNames,
+							defaultState: defaultState,
+							hoverState: hoverState
+						}
+					);
+				}
+			},
+
+			/**
+			 * Setter for the disabled attribute
+			 *
+			 * @method _setDisabled
+			 * @protected
+			 */
+			_setDisabled: function() {
+				var instance = this;
+
+				var boundingBox = instance.get(BOUNDING_BOX);
+
+				boundingBox.setAttribute(DISABLED, true);
 			},
 
 			/**
@@ -600,4 +633,4 @@ var ButtonItem = A.Component.create(
 
 A.ButtonItem = ButtonItem;
 
-}, '@VERSION@' ,{requires:['aui-base','aui-state-interaction','widget-child'], skinnable:true});
+}, '@VERSION@' ,{skinnable:true, requires:['aui-base','aui-state-interaction','widget-child']});
