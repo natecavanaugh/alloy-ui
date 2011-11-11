@@ -797,6 +797,7 @@ Y.Event.define = function (type, config, force) {
             Impl = function () {
                 SyntheticEvent.apply(this, arguments);
             };
+
             Y.extend(Impl, SyntheticEvent, eventDef);
             synth = new Impl();
 
