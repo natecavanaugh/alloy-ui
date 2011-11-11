@@ -1,5 +1,8 @@
 ;(function() {
 	YUI.AUI_config = {
+		aliases: {
+@ALIASES@
+		},
 		filter: 'raw',
 
 		io: {

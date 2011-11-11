@@ -3,7 +3,9 @@
 	<property name="regex.clean.vars" value="^component\.details\..*|global\.build\.component|details\.list|details|component\.(rollup|use|supersedes|requires|optional|lang|skinnable)|component.*$"/>
 	<property name="aui.default.moduledefaultstemplate" value="${project.dir}/resources/builder/templates/moduledeftemplate.txt"/>
 	<property name="aui.default.defaultstemplate" value="${project.dir}/resources/builder/templates/moduledefaults.txt"/>
+	<property name="aui.default.aliasestemplate" value="${project.dir}/resources/builder/templates/aliasestemplate.txt"/>
 	<property name="aui.default.defaultsfile" value="${project.dir}/resources/temp/defaults.js"/>
+	<property name="aui.default.aliasesfile" value="${project.dir}/resources/temp/aliases.js"/>
 	<property name="aui.default.prependdefaults" value="true"/>
 
 	<!-- Overwriting default YUI tasks -->
@@ -95,6 +97,7 @@
 	<macrodef name="create-module-details">
 		<attribute name="moduledefaultstemplate" default="${aui.default.moduledefaultstemplate}"/>
 		<attribute name="defaultsfile" default="${aui.default.defaultsfile}"/>
+		<attribute name="aliasesfile" default="${aui.default.aliasesfile}"/>
 		<sequential>
 			<var name="submodule.module.name" value="${component}"/>
 			<var name="submodule.module.details.hash" value="${component.details.hash}"/>
@@ -104,10 +107,31 @@
 				property="module.deftemplate.content"
 			/>
 
+			<var name="submodule.details.hash" value=""/>
+			<var name="alias.details.hash" value=""/>
+
+			<propertyregex
+				casesensitive="false"
+				input="${module.deftemplate.content}"
+				override="true"
+				property="modname.tab.level"
+				regexp="([\s\t]+)'@MODULE@'"
+				select="\1"
+			/>
+			
+
 			<if>
 				<equals arg1="${component.rollup}" arg2="true"/>
 				<then>
-					<var name="submodule.details.hash" value=""/>
+					<var name="mod.details.use" value="${component.details.use}" />
+
+					<propertyregex property="alias.details.hash"
+						override="true"
+						input="${component.details.use}"
+						casesensitive="false"
+						regexp="use:"
+						replace=""
+						/>
 
 					<for delimiter=", " list="${component.rollup.modules.buildfiles}" param="file" trim="true">
 						<sequential>
@@ -119,22 +143,24 @@
 
 							<var file="${project.dir}/src/${submodule.module.name}/${propertiesfile}"/>
 							<createdetails/>
-							<var name="submodule.details.hash" value="'${component}': ${component.details.hash}, ${submodule.details.hash}"/>
+							<var name="submodule.details.hash" value="'${component}': ${component.details.hash},${line.separator}${modname.tab.level}${submodule.details.hash}"/>
 
 							<var name="propertiesfile" unset="true"/>
 						</sequential>
 					</for>
 
-					<propertyregex
-						casesensitive="false"
-						input="${submodule.module.details.hash}"
-						override="true"
-						property="component.details.hash"
-						regexp="^\{"
-						replace="{submodules: {${submodule.details.hash}}, "
-					/>
+					<var name="component.details.hash" value="{${mod.details.use}},${line.separator}${modname.tab.level}${submodule.details.hash}" />
+
+					<replaceregexp match="([\s\t\n]+)(@ALIASES@)" replace="\1${module.deftemplate.content}\2" flags="g" byline="false">
+						<fileset file="@{aliasesfile}"/>
+					</replaceregexp>
 				</then>
 			</if>
+
+			<replace file="@{aliasesfile}">
+				<replacefilter token="@MODULE@" value="${submodule.module.name}"/>
+				<replacefilter token="@DETAILS@" value="${alias.details.hash}"/>
+			</replace>
 
 			<replaceregexp match="([\s\t\n]+)(@MODULES@)" replace="\1${module.deftemplate.content}\2" flags="g" byline="false">
 				<fileset file="@{defaultsfile}"/>
@@ -147,8 +173,130 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="create-module-details2">
+		<attribute name="moduledefaultstemplate" default="${aui.default.moduledefaultstemplate}"/>
+		<attribute name="defaultsfile" default="${aui.default.defaultsfile}"/>
+		<attribute name="aliasesfile" default="${aui.default.aliasesfile}"/>
+		<sequential>
+			<var name="submodule.module.name" value="${component}"/>
+			<var name="submodule.module.details.hash" value="${component.details.hash}"/>
+
+			<loadfile
+				srcFile="@{moduledefaultstemplate}"
+				property="module.deftemplate.content"
+			/>
+
+			<var name="submodule.details.hash" value=""/>
+			<var name="alias.details.hash" value=""/>
+
+			<propertyregex
+				casesensitive="false"
+				input="${module.deftemplate.content}"
+				override="true"
+				property="modname.tab.level"
+				regexp="([\s\t]+)'@MODULE@'"
+				select="\1"
+			/>
+
+			<replaceregexp match="([\s\t\n]+)(@MODULES@)" replace="\1${module.deftemplate.content}\2" flags="g" byline="false">
+				<fileset file="@{defaultsfile}"/>
+			</replaceregexp>
+
+			<if>
+				<equals arg1="${component.rollup}" arg2="true"/>
+				<then>
+					<propertyregex property="alias.details.hash"
+						override="true"
+						input="${component.details.use}"
+						casesensitive="false"
+						regexp="use:"
+						replace=""
+						/>
+					<!-- <propertyregex property="component.alias"
+						override="true"
+						input="${component.use}"
+						casesensitive="false"
+						regexp="([^\,\s]+)"
+						replace="'\1'"
+						/> -->
+
+<!-- 					<echo>|||> ${alias.details.hash} __</echo> -->
+
+					<for delimiter=", " list="${component.rollup.modules.buildfiles}" param="file" trim="true">
+						<sequential>
+							<propertyregex property="propertiesfile"
+							               input="@{file}"
+							               regexp=".xml$"
+							               replace=".properties" />
+							<clean-variables regex="${regex.clean.vars}"/>
+
+							<var file="${project.dir}/src/${submodule.module.name}/${propertiesfile}"/>
+							<createdetails/>
+							<!-- <echo>|||> ${component.details.hash} __</echo> -->
+							<var name="submodule.details.hash" value="'${component}': ${component.details.hash},${line.separator}${modname.tab.level}${submodule.details.hash}"/>
+
+							<var name="propertiesfile" unset="true"/>
+						</sequential>
+					</for>
+
+					<propertyregex
+						casesensitive="false"
+						input="${submodule.module.details.hash}"
+						override="true"
+						property="component.details.hash"
+						regexp="^\{"
+						replace="{"
+					/>
+
+					<replaceregexp match="([\s\t\n]+)(@ALIASES@)" replace="\1${module.deftemplate.content}\2" flags="g" byline="false">
+						<fileset file="@{aliasesfile}"/>
+					</replaceregexp>
+					<!-- <loadfile
+						srcFile="@{aliasesfile}"
+						property="aliases.test"
+					/>
+					<echo>${aliases.test}</echo> -->
+					<replace file="@{aliasesfile}">
+						<replacefilter token="@MODULE@" value="${submodule.module.name}"/>
+						<replacefilter token="@DETAILS@" value="${alias.details.hash}"/>
+					</replace>
+
+					<replace file="@{defaultsfile}">
+						<replacefilter token="@MODULE@:" value="${submodule.module.name}"/>
+						<replacefilter token="@DETAILS@" value="${component.details.hash},${line.separator}${modname.tab.level}${submodule.details.hash}"/>
+					</replace>
+				</then>
+				<else>
+					<!-- <replace file="@{defaultsfile}">
+						<replacefilter token="@MODULE@" value="${submodule.module.name}"/>
+						<replacefilter token="@DETAILS@" value="${component.details.hash}"/>
+					</replace> -->
+				</else>
+			</if>
+
+			<if>
+				<not>
+					<equals arg1="${component.rollup}" arg2="true"/>
+				</not>
+				<then>
+					
+				</then>
+				<else>
+					
+				</else>
+			</if>
+
+			<!-- <replace file="@{defaultsfile}">
+				<replacefilter token="@MODULE@" value="${submodule.module.name}"/>
+				<replacefilter token="@DETAILS@" value="${submodule.details.hash}"/>
+			</replace> -->
+		</sequential>
+	</macrodef>
+
 	<macrodef name="create-module-list">
 		<attribute name="defaultstemplate" default="${aui.default.defaultstemplate}"/>
+		<attribute name="aliasestemplate" default="${aui.default.aliasestemplate}"/>
+		<attribute name="aliasesfile" default="${aui.default.aliasesfile}"/>
 		<attribute name="defaultsfile" default="${aui.default.defaultsfile}"/>
 		<attribute name="prependdefaults" default="${aui.default.prependdefaults}"/>
 		<sequential>
@@ -157,6 +305,12 @@
 			<copy
 				file="@{defaultstemplate}"
 				tofile="@{defaultsfile}"
+				overwrite="true"
+			/>
+
+			<copy
+				file="@{aliasestemplate}"
+				tofile="@{aliasesfile}"
 				overwrite="true"
 			/>
 
@@ -174,7 +328,7 @@
 				</sequential>
 			</for>
 
-			<format-module-list defaultsfile="@{defaultsfile}"/>
+			<format-module-list defaultsfile="@{defaultsfile}" aliasesfile="@{aliasesfile}"/>
 
 			<if>
 				<equals arg1="@{prependdefaults}" arg2="true"/>
@@ -237,11 +391,11 @@
 			</delete>
 
 			<concat destfile="${aui.combined.file}" fixlastline="yes" eol="${buildfiles.eol}">
-				<header file="${global.build.base}/yui-base/yui-base.js"/>
+				<header file="${global.build.base}/yui/yui.js"/>
 				<fileset dir="${global.build.base}/${build.aui.prefix}aui-base" includes="${build.aui.prefix}aui-base.js"/>
 			</concat>
 			<concat destfile="${aui.combined.min.file}" fixlastline="yes" eol="${buildfiles.eol}">
-				<header file="${global.build.base}/yui-base/yui-base-min.js"/>
+				<header file="${global.build.base}/yui/yui-min.js"/>
 				<fileset dir="${global.build.base}/${build.aui.prefix}aui-base" includes="${build.aui.prefix}aui-base-min.js"/>
 			</concat>
 
@@ -309,14 +463,30 @@
 
 	<macrodef name="format-module-list">
 		<attribute name="defaultsfile" default="${aui.default.defaultsfile}"/>
+		<attribute name="aliasesfile" default="${aui.default.aliasesfile}"/>
 		<sequential>
+			<loadfile
+				srcFile="@{aliasesfile}"
+				property="aliases.content"
+			/>
+
+			<replaceregexp match="@ALIASES@[\r\n]" replace="${aliases.content}" flags="g" byline="false">
+				<fileset file="@{defaultsfile}"/>
+			</replaceregexp>
+			<replaceregexp match="@ALIASES@[\r\n]" replace="" flags="g" byline="false">
+				<fileset file="@{defaultsfile}"/>
+			</replaceregexp>
+
 			<replace file="@{defaultsfile}">
 				<replacefilter token=": ," value=": "/>
 			</replace>
 			<replaceregexp match="@MODULES@[\r\n]" replace="" flags="g" byline="false">
 				<fileset file="@{defaultsfile}"/>
 			</replaceregexp>
-			<replaceregexp match="\},([\s\t\n]+)}" replace="}\1}" flags="g" byline="false">
+			<replaceregexp match="\},([\s\t\n]+)," replace="}," flags="g" byline="false">
+				<fileset file="@{defaultsfile}"/>
+			</replaceregexp>
+			<replaceregexp match="(\}|\]),([\s\t\n]+)\}" replace="\1\2}" flags="g" byline="false">
 				<fileset file="@{defaultsfile}"/>
 			</replaceregexp>
 		</sequential>
