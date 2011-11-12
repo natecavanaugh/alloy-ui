@@ -57,6 +57,17 @@
 		ALLOY = YUI(defaults);
 	}
 
+	var globalAliases = YUI.Env && YUI.Env.aliases;
+	var auiAliases = defaults.aliases;
+
+	if (globalAliases && auiAliases) {
+		for (var i in auiAliases) {
+			if (auiAliases.hasOwnProperty(i)) {
+				globalAliases[i] = auiAliases[i];
+			}
+		}
+	}
+
 	var guidExtensions = function(A) {
 		A.Env._guidp = ['aui', A.version, A.Env._yidx].join('_').replace(/\./g, '_');
 	};
