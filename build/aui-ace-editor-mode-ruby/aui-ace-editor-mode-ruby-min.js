@@ -1,0 +1,1 @@
+AUI.add("aui-ace-editor-mode-ruby",function(a){},"@VERSION@",{requires:["aui-ace-editor-base"],skinnable:false});

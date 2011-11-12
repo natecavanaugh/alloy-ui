@@ -1,0 +1,1 @@
+AUI.add("aui-drawing-safari",function(a){a.Drawing.prototype.safari=function(){var b=this;var c=b.rect(-99,-99,b.get("width")+99,b.get("height")+99).attr({stroke:"none"});setTimeout(function(){c.remove();},0);};},"@VERSION@",{requires:["aui-drawing-base"]});
