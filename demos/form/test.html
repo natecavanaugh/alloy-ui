@@ -659,7 +659,19 @@ AUI().ready(
 				on: function (node, subscription, notifier) {
 					var instance = this;
 
-					instance._attachEvents(node, subscription, notifier);
+					instance._attachEvent(node, subscription, notifier);
+				},
+
+				_attachEvent: function(node, subscription, notifier) {
+					var instance = this;
+
+					var type = instance._getEventName(node);
+
+					var handlers = instance._prepareHandlers(subscription, node);
+
+					if (!handlers[type]) {
+						handlers[type] = A.Event._attach([type, notifier.fire, node, notifier]);
+					}
 				},
 
 				_attachEvents: function(node, subscription, notifier, filter) {
@@ -667,18 +679,12 @@ AUI().ready(
 
 					var handlers = instance._prepareHandlers(subscription, node);
 
-					handlers['beforeactivate'] = node[filter ? 'delegate' : 'on'](
+					handlers['beforeactivate'] = node.delegate(
 						'beforeactivate',
 						function(event) {
 							var activeElement = this;
 
-							var type = instance._getEventName(activeElement);
-
-							var handlers = instance._prepareHandlers(subscription, activeElement);
-
-							if (!handlers[type]) {
-								handlers[type] = A.Event._attach([type, notifier.fire, activeElement, notifier]);
-							}
+							instance._attachEvent(activeElement, subscription, notifier);
 						},
 						filter
 					);
@@ -763,6 +769,22 @@ AUI().ready(
 		A.one('form').on('submit', function(event) {
 			event.preventDefault();
 			A.log('!regular submit!');
+		});
+
+		A.one('#checkbox1').on('change', function() {
+			A.log('change event to single checkbox');
+		});
+
+		A.one('#textareaField').on('change', function() {
+			A.log('change event to single textarea');
+		});
+
+		A.one('#textField').on('change', function() {
+			A.log('change event to single text field');
+		});
+
+		A.one('#menuField').on('change', function() {
+			A.log('change event to single select');
 		});
 	}
 );
