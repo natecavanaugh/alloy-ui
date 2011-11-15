@@ -54,6 +54,14 @@ import org.json.JSONObject;
  */
 public class XMLBuilder {
 
+	public static void main(String[] args) throws Exception {
+		String componentsJSON = System.getProperty("xmlbuilder.components.json");
+		String componentsXML = System.getProperty("tagbuilder.components.xml");
+		String componentExcluded = System.getProperty("xmlbuilder.components.excluded");
+
+		new XMLBuilder(componentsJSON, componentsXML, componentExcluded);
+	}
+
 	public XMLBuilder(String componentsJSON, String componentsXML,
 			String componentExcluded)
 		throws Exception {
@@ -77,14 +85,6 @@ public class XMLBuilder {
 		_classMapJSON = _json.getJSONObject("classmap");
 
 		_create();
-	}
-
-	public static void main(String[] args) throws Exception {
-		String componentsJSON = System.getProperty("xmlbuilder.components.json");
-		String componentsXML = System.getProperty("tagbuilder.components.xml");
-		String componentExcluded = System.getProperty("xmlbuilder.components.excluded");
-
-		new XMLBuilder(componentsJSON, componentsXML, componentExcluded);
 	}
 
 	public ArrayList<Attribute> getComponentAttributes(String className) {
@@ -141,7 +141,9 @@ public class XMLBuilder {
 	}
 
 	public boolean isExcludedComponent(Component component) {
-		return (!component.getModule().startsWith(AUI_PREFIX) ||
+		String module = component.getModule();
+
+		return (!module.startsWith(AUI_PREFIX) ||
 				_componentExcluded.contains(component.getName()));
 	}
 
@@ -277,10 +279,10 @@ public class XMLBuilder {
 				Iterator<String> it = typeJSON.keys();
 
 				while (it.hasNext()) {
-					String attributeName = it.next();
+					String name = it.next();
 
 					JSONObject attributeJSON = JSONUtil.getJSONObject(
-						typeJSON, attributeName);
+						typeJSON, name);
 
 					String inputType = GetterUtil.getString(
 						JSONUtil.getString(attributeJSON, "type"),
@@ -303,9 +305,14 @@ public class XMLBuilder {
 					boolean required = GetterUtil.getBoolean(
 						JSONUtil.getString(attributeJSON, "required"));
 
-					Attribute attribute = new Attribute(
-						attributeName, inputType, outputType, defaultValue, description,
-							required);
+					Attribute attribute = new Attribute();
+
+					attribute.setName(name);
+					attribute.setInputType(inputType);
+					attribute.setOutputType(outputType);
+					attribute.setDefaultValue(defaultValue);
+					attribute.setDescription(description);
+					attribute.setRequired(required);
 
 					attributes.add(attribute);
 				}
