@@ -474,5 +474,5 @@ A.Event.define(
 }, '@VERSION@' ,{requires:['aui-base']});
 
 
-AUI.add('aui-event', function(A){}, '@VERSION@' ,{skinnable:false, use:['aui-event-base','aui-event-input'], plugins:{'aui-event-delegate-change': {condition: {trigger: 'event-base-ie', ua: 'ie'}}}});
+AUI.add('aui-event', function(A){}, '@VERSION@' ,{use:['aui-event-base','aui-event-input'], skinnable:false, plugins:{'aui-event-delegate-change': {condition: {trigger: 'event-base-ie', ua: 'ie'}}}});
 
