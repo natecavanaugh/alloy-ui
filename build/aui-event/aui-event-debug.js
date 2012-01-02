@@ -396,20 +396,23 @@ A.Event.define(
 				if (delegateNode) {
 					fireFn = function(event) {
 						if (node) {
-							var tmpEl = node.getDOM();
 							var delegateEl = delegateNode.getDOM();
+							var tmpEl = node.getDOM();
+							var tmpEvent = A.clone(event);
 
 							do {
 								if (tmpEl && Selector.test(tmpEl, filter)) {
-									event.currentTarget = A.one(tmpEl);
-									event.container = delegateNode;
+									tmpEvent.currentTarget = A.one(tmpEl);
+									tmpEvent.container = delegateNode;
 
-									notifier.fire(event);
+									notifier.fire(tmpEvent);
 								}
 
 								tmpEl = tmpEl.parentNode;
 							}
-							while(tmpEl && tmpEl !== delegateEl && event.stopped !== 2);
+							while(tmpEl && tmpEl !== delegateEl && !tmpEvent.stopped);
+
+							return (tmpEvent.stopped !== 2);
 						}
 					};
 				}
@@ -486,5 +489,5 @@ A.Event.define(
 }, '@VERSION@' ,{requires:['aui-node-base','aui-event-base'], condition: {name: 'aui-event-delegate-change', trigger: 'event-base-ie', ua: 'ie'}});
 
 
-AUI.add('aui-event', function(A){}, '@VERSION@' ,{skinnable:false, use:['aui-event-base','aui-event-input']});
+AUI.add('aui-event', function(A){}, '@VERSION@' ,{use:['aui-event-base','aui-event-input'], skinnable:false});
 

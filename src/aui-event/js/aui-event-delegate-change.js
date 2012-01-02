@@ -45,20 +45,23 @@ A.Event.define(
 				if (delegateNode) {
 					fireFn = function(event) {
 						if (node) {
-							var tmpEl = node.getDOM();
 							var delegateEl = delegateNode.getDOM();
+							var tmpEl = node.getDOM();
+							var tmpEvent = A.clone(event);
 
 							do {
 								if (tmpEl && Selector.test(tmpEl, filter)) {
-									event.currentTarget = A.one(tmpEl);
-									event.container = delegateNode;
+									tmpEvent.currentTarget = A.one(tmpEl);
+									tmpEvent.container = delegateNode;
 
-									notifier.fire(event);
+									notifier.fire(tmpEvent);
 								}
 
 								tmpEl = tmpEl.parentNode;
 							}
-							while(tmpEl && tmpEl !== delegateEl && event.stopped !== 2);
+							while(tmpEl && tmpEl !== delegateEl && !tmpEvent.stopped);
+
+							return (tmpEvent.stopped !== 2);
 						}
 					};
 				}
