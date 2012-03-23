@@ -250,4 +250,4 @@ var DialogIframePlugin = A.Component.create(
 
 A.Plugin.DialogIframe = DialogIframePlugin;
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-base','aui-loading-mask','aui-resize-iframe','plugin']});
+}, '@VERSION@' ,{requires:['aui-base','aui-loading-mask','aui-resize-iframe','plugin'], skinnable:true});
