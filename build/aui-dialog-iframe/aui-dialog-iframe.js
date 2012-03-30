@@ -95,7 +95,7 @@ var DialogIframePlugin = A.Component.create(
 
 			_afterRenderUI: function() {
 				var instance = this;
-				
+
 				instance._plugIframe();
 
 				instance._bindEvents();
@@ -161,6 +161,10 @@ var DialogIframePlugin = A.Component.create(
 				}
 
 				instance._bodyNode.loadingmask.hide();
+
+				// AUI-632: Resize immediately so we can center the dialog with the new size
+				instance.node.resizeiframe._onResize();
+				instance._host._syncUIPosAlign();
 			},
 
 			_plugIframe: function() {
@@ -250,4 +254,4 @@ var DialogIframePlugin = A.Component.create(
 
 A.Plugin.DialogIframe = DialogIframePlugin;
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-base','aui-loading-mask','aui-resize-iframe','plugin']});
+}, '@VERSION@' ,{requires:['aui-base','aui-loading-mask','aui-resize-iframe','plugin'], skinnable:true});

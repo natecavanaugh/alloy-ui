@@ -304,4 +304,4 @@ Audio.TPL_FLASH = '<object id="{id}" {applicationType} height="{height}" width="
 
 A.Audio = Audio;
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-base','querystring-stringify-simple']});
+}, '@VERSION@' ,{requires:['aui-base','querystring-stringify-simple'], skinnable:true});
