@@ -30,7 +30,7 @@ var Lang = A.Lang,
 	CHECKBOX_CELL_EDITOR = 'checkboxCellEditor',
 	CHECKED = 'checked',
 	CLICK = 'click',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 	CONTENT_BOX = 'contentBox',
 	DATA = 'data',
 	DATATABLE = 'datatable',
@@ -72,7 +72,7 @@ var Lang = A.Lang,
 	PENCIL = 'pencil',
 	RADIO_CELL_EDITOR = 'radioCellEditor',
 	RECORDS = 'records',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	REMOVE = 'remove',
 	RENDERED = 'rendered',
 	RETURN = 'return',
@@ -162,7 +162,8 @@ A.mix(CellEditorSupport.prototype, {
 	getCellEditor: function(record, column) {
 		var instance = this;
 		var columnEditor = column.get(EDITOR);
-		var recordEditor = record.get(DATA).editor;
+		// http://yuilibrary.com/yui/docs/datatable/migration.html#formatters
+		var recordEditor = record.get(EDITOR);
 
 		if (columnEditor === false || recordEditor === false) {
 			return null;
@@ -172,7 +173,7 @@ A.mix(CellEditorSupport.prototype, {
 	},
 
 	getRecordColumnValue: function(record, column) {
-		return record.getValue(column.get(FIELD));
+		return record.get(column.get(FIELD));
 	},
 
 	syncEditableColumnsUI: function() {
@@ -189,7 +190,8 @@ A.mix(CellEditorSupport.prototype, {
 		});
 
 		A.each(recordset.get(RECORDS), function(record) {
-			var editor = record.get(DATA).editor;
+		// http://yuilibrary.com/yui/docs/datatable/migration.html#formatters
+			var editor = record.get(EDITOR);
 			var isBaseEditorInstance = isBaseEditor(editor);
 
 			A.all(_HASH + record.get("id") + '>td').each(function(td, index) {
@@ -215,7 +217,7 @@ A.mix(CellEditorSupport.prototype, {
 		var instance = this;
 
 		if (!instance.events) {
-			instance.plug(A.Plugin.DataTableEvents);
+			instance.plug(A.DataTableEvents);
 		}
 	},
 

@@ -121,7 +121,7 @@ var L = A.Lang,
 	PREPEND = 'prepend',
 	READ_ONLY_ATTRIBUTES = 'readOnlyAttributes',
 	RECORDS = 'records',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	REGION = 'region',
 	REMOVE = 'remove',
 	RENDER = 'render',
@@ -649,9 +649,7 @@ var FormBuilder = A.Component.create({
 			var editingField = instance.editingField;
 
 			if (editingField) {
-				var recordset = instance.propertyList.get(RECORDSET);
-
-				AArray.each(recordset.get(RECORDS), function(record) {
+				AArray.each(instance.propertyList.get(RECORDS), function(record) {
 					var data = record.get(DATA);
 
 					editingField.set(data.attributeName, data.value);
@@ -2767,5 +2765,5 @@ A.FormBuilder.types['textarea'] = A.FormBuilderTextAreaField;
 }, '@VERSION@' ,{skinnable:true, requires:['aui-datatype','aui-panel','aui-tooltip']});
 
 
-AUI.add('aui-form-builder', function(A){}, '@VERSION@' ,{skinnable:true, use:['aui-form-builder-base','aui-form-builder-field']});
+AUI.add('aui-form-builder', function(A){}, '@VERSION@' ,{use:['aui-form-builder-base','aui-form-builder-field'], skinnable:true});
 

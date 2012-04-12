@@ -8,11 +8,11 @@ var Lang = A.Lang,
 
 	CHANGE = 'change',
 	CHILD_NODES = 'childNodes',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 	DATA = 'data',
 	HEADERS = 'headers',
 	ID = 'id',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	RECORDSET_CHANGE = 'recordsetChange',
 
 	_HASH = '#',
@@ -64,7 +64,7 @@ A.Column = A.Base.create('column', A.Column, [], {}, {
 	ATTRS: {
 		sortFn: {
 			value: function(recA, recB, field, desc) {
-				var sorted = compare(recA.getValue(field), recB.getValue(field), desc);
+				var sorted = compare(recA.get(field), recB.get(field), desc);
 
 				if (sorted === 0) {
 					sorted = compare(recA.get('id'), recB.get('id'), desc);
@@ -76,7 +76,7 @@ A.Column = A.Base.create('column', A.Column, [], {}, {
 	}
 });
 
-A.Columnset = A.Base.create('columnset', A.Columnset, [], {
+A.Columnset = A.Base.create(COLUMNSET, A.Columnset, [], {
 	getColumn: function(i) {
 		var instance = this;
 
@@ -112,7 +112,7 @@ A.Columnset = A.Base.create('columnset', A.Columnset, [], {
 	}
 }, {});
 
-A.Recordset = A.Base.create('recordset', A.Recordset, [], {
+A.Recordset = A.Base.create(RECORDSET, A.Recordset, [], {
 	getRecordByRow: function(row) {
 		var instance = this;
 
@@ -154,4 +154,4 @@ A.Plugin.RecordsetSort.prototype._defSortFn = function(event) {
     instance.set('lastSortProperties', event);
 };
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-base','datatable','plugin']});
+}, '@VERSION@' ,{skinnable:true, requires:['aui-base','datatable','datatable-sort','plugin']});

@@ -8,11 +8,11 @@ var Lang = A.Lang,
 
 	CHANGE = 'change',
 	CHILD_NODES = 'childNodes',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 	DATA = 'data',
 	HEADERS = 'headers',
 	ID = 'id',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	RECORDSET_CHANGE = 'recordsetChange',
 
 	_HASH = '#',
@@ -64,7 +64,7 @@ A.Column = A.Base.create('column', A.Column, [], {}, {
 	ATTRS: {
 		sortFn: {
 			value: function(recA, recB, field, desc) {
-				var sorted = compare(recA.getValue(field), recB.getValue(field), desc);
+				var sorted = compare(recA.get(field), recB.get(field), desc);
 
 				if (sorted === 0) {
 					sorted = compare(recA.get('id'), recB.get('id'), desc);
@@ -76,7 +76,7 @@ A.Column = A.Base.create('column', A.Column, [], {}, {
 	}
 });
 
-A.Columnset = A.Base.create('columnset', A.Columnset, [], {
+A.Columnset = A.Base.create(COLUMNSET, A.Columnset, [], {
 	getColumn: function(i) {
 		var instance = this;
 
@@ -112,7 +112,7 @@ A.Columnset = A.Base.create('columnset', A.Columnset, [], {
 	}
 }, {});
 
-A.Recordset = A.Base.create('recordset', A.Recordset, [], {
+A.Recordset = A.Base.create(RECORDSET, A.Recordset, [], {
 	getRecordByRow: function(row) {
 		var instance = this;
 
@@ -154,7 +154,7 @@ A.Plugin.RecordsetSort.prototype._defSortFn = function(event) {
     instance.set('lastSortProperties', event);
 };
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-base','datatable','plugin']});
+}, '@VERSION@' ,{skinnable:true, requires:['aui-base','datatable','datatable-sort','plugin']});
 AUI.add('aui-datatable-events', function(A) {
 // TODO - optimize code
 
@@ -194,7 +194,7 @@ var Lang = A.Lang,
 	MOUSEENTER = 'mouseenter',
 	MOUSELEAVE = 'mouseleave',
 	MOUSEUP = 'mouseup',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	ROW = 'row',
 	TABLE = 'table',
 	TAGS = 'tags',
@@ -203,7 +203,7 @@ var Lang = A.Lang,
 	THEAD = 'thead',
 	TR = 'tr',
     DATATABLE = 'datatable',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 
 	_COMMA = ',',
 	_DOT = '.',
@@ -429,7 +429,7 @@ var Lang = A.Lang,
 	CHECKBOX_CELL_EDITOR = 'checkboxCellEditor',
 	CHECKED = 'checked',
 	CLICK = 'click',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 	CONTENT_BOX = 'contentBox',
 	DATA = 'data',
 	DATATABLE = 'datatable',
@@ -471,7 +471,7 @@ var Lang = A.Lang,
 	PENCIL = 'pencil',
 	RADIO_CELL_EDITOR = 'radioCellEditor',
 	RECORDS = 'records',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	REMOVE = 'remove',
 	RENDERED = 'rendered',
 	RETURN = 'return',
@@ -561,7 +561,8 @@ A.mix(CellEditorSupport.prototype, {
 	getCellEditor: function(record, column) {
 		var instance = this;
 		var columnEditor = column.get(EDITOR);
-		var recordEditor = record.get(DATA).editor;
+		// http://yuilibrary.com/yui/docs/datatable/migration.html#formatters
+		var recordEditor = record.get(EDITOR);
 
 		if (columnEditor === false || recordEditor === false) {
 			return null;
@@ -571,7 +572,7 @@ A.mix(CellEditorSupport.prototype, {
 	},
 
 	getRecordColumnValue: function(record, column) {
-		return record.getValue(column.get(FIELD));
+		return record.get(column.get(FIELD));
 	},
 
 	syncEditableColumnsUI: function() {
@@ -588,7 +589,8 @@ A.mix(CellEditorSupport.prototype, {
 		});
 
 		A.each(recordset.get(RECORDS), function(record) {
-			var editor = record.get(DATA).editor;
+		// http://yuilibrary.com/yui/docs/datatable/migration.html#formatters
+			var editor = record.get(EDITOR);
 			var isBaseEditorInstance = isBaseEditor(editor);
 
 			A.all(_HASH + record.get("id") + '>td').each(function(td, index) {
@@ -614,7 +616,7 @@ A.mix(CellEditorSupport.prototype, {
 		var instance = this;
 
 		if (!instance.events) {
-			instance.plug(A.Plugin.DataTableEvents);
+			instance.plug(A.DataTableEvents);
 		}
 	},
 
@@ -1849,7 +1851,7 @@ var Lang = A.Lang,
     }),
 
 	CELL = 'cell',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 	COLUMNSET_CHANGE = 'columnsetChange',
 	DATATABLE = 'datatable',
 	DOWN = 'down',
@@ -1862,7 +1864,7 @@ var Lang = A.Lang,
 	MOUSEDOWN = 'mousedown',
 	MOUSE_EVENT = 'mouseEvent',
 	MULTIPLE = 'multiple',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	RECORDSET_CHANGE = 'recordsetChange',
 	RETURN = 'return',
 	RIGHT = 'right',

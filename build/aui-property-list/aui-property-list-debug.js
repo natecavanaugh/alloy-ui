@@ -4,14 +4,14 @@ var Lang = A.Lang,
 	isObject = Lang.isObject,
 
 	AUTO = 'auto',
-	COLUMNSET = 'columnset',
+	COLUMNSET = 'columns',
 	DATA = 'data',
 	DBLCLICK = 'dblclick',
 	HEIGHT = 'height',
 	KEY = 'key',
 	NAME = 'name',
 	PROPERTY_NAME = 'propertyName',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	RECORDSET_CHANGE = 'recordsetChange',
 	SCROLL = 'scroll',
 	SELECTION = 'selection',
@@ -27,7 +27,7 @@ var PropertyList = A.Component.create({
 	NAME: _NAME,
 
 	ATTRS: {
-		columnset: {
+		columns: {
 			valueFn: function() {
 				var instance = this;
 
@@ -36,6 +36,7 @@ var PropertyList = A.Component.create({
 						editor: false,
 						key: NAME,
 						label: instance.getString(PROPERTY_NAME),
+						scrollable: 'y',
 						sortable: true
 					},
 					{
@@ -54,6 +55,7 @@ var PropertyList = A.Component.create({
 						key: VALUE,
 						label: instance.getString(VALUE),
 						sortable: true,
+						scrollable: 'y',
 						width: 'auto'
 					}
 				];
@@ -64,7 +66,7 @@ var PropertyList = A.Component.create({
 			value: DBLCLICK
 		},
 
-		recordset: {
+		data: {
 			value: [{ name: _EMPTY_STR, value: _EMPTY_STR }]
 		},
 
@@ -146,14 +148,6 @@ var PropertyList = A.Component.create({
 			instance.plug(
 				A.Plugin.DataTableSelection,
 				instance.get(SELECTION)
-			)
-			.plug(
-				A.Plugin.DataTableSort,
-				instance.get(SORT)
-			)
-			.plug(
-				A.Plugin.DataTableScroll,
-				instance.get(SCROLL)
 			);
 		},
 
@@ -173,4 +167,4 @@ var PropertyList = A.Component.create({
 
 A.PropertyList = PropertyList;
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-datatable']});
+}, '@VERSION@' ,{requires:['aui-datatable','datatable-scroll','datatable-sort'], skinnable:true});

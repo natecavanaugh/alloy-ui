@@ -69,7 +69,7 @@ var Lang = A.Lang,
 	PENCIL = 'pencil',
 	RADIUS = 'radius',
 	RECORDS = 'records',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	REGION = 'region',
 	RENDERED = 'rendered',
 	REQUIRED = 'required',
@@ -742,10 +742,10 @@ var DiagramBuilder = A.Component.create({
 			var instance = this;
 			var editingNode = instance.editingNode;
 			var editingConnector = instance.editingConnector;
-			var recordset = instance.propertyList.get(RECORDSET);
 
 			if (editingNode) {
-				AArray.each(recordset.get(RECORDS), function(record) {
+				// http://yuilibrary.com/yui/docs/datatable/migration.html#formatters
+				AArray.each(instance.propertyList.get(RECORDS), function(record) {
 					var data = record.get(DATA);
 
 					editingNode.set(data.attributeName, data.value);
