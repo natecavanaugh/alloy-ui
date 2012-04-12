@@ -120,7 +120,7 @@ var L = A.Lang,
 	PREPEND = 'prepend',
 	READ_ONLY_ATTRIBUTES = 'readOnlyAttributes',
 	RECORDS = 'records',
-	RECORDSET = 'recordset',
+	RECORDSET = 'data',
 	REGION = 'region',
 	REMOVE = 'remove',
 	RENDER = 'render',
@@ -648,9 +648,8 @@ var FormBuilder = A.Component.create({
 			var editingField = instance.editingField;
 
 			if (editingField) {
-				var recordset = instance.propertyList.get(RECORDSET);
-
-				AArray.each(recordset.get(RECORDS), function(record) {
+				// http://yuilibrary.com/yui/docs/datatable/migration.html#formatters
+				AArray.each(instance.propertyList.get(RECORDS), function(record) {
 					var data = record.get(DATA);
 
 					editingField.set(data.attributeName, data.value);

@@ -464,7 +464,7 @@ var DiagramBuilderBase = A.Component.create(
 
 				instance.after({
 					render: instance._afterRender,
-					'recordset:update': instance._afterRecordsetUpdate
+					'data:update': instance._afterRecordsetUpdate
 				});
 
 				instance.after(instance._afterUiSetHeight, instance, '_uiSetHeight');
