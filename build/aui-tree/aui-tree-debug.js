@@ -809,7 +809,7 @@ var TreeData = A.Component.create(
 
 A.TreeData = TreeData;
 
-}, '@VERSION@' ,{skinnable:false, requires:['aui-base']});
+}, '@VERSION@' ,{requires:['aui-base'], skinnable:false});
 AUI.add('aui-tree-node', function(A) {
 /**
  * The TreeNode Utility
@@ -2624,7 +2624,7 @@ A.TreeNode.nodeTypes = {
 	io: A.TreeNodeIO
 };
 
-}, '@VERSION@' ,{skinnable:false, requires:['aui-tree-data','aui-io','json','querystring-stringify']});
+}, '@VERSION@' ,{requires:['aui-tree-data','aui-io','json','querystring-stringify'], skinnable:false});
 AUI.add('aui-tree-view', function(A) {
 /**
  * The TreeView Utility

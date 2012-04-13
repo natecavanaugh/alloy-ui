@@ -471,5 +471,5 @@ A.TogglerDelegate = TogglerDelegate;
 }, '@VERSION@' ,{requires:['aui-toggler-base'], skinnable:false});
 
 
-AUI.add('aui-toggler', function(A){}, '@VERSION@' ,{skinnable:true, use:['aui-toggler-base','aui-toggler-delegate']});
+AUI.add('aui-toggler', function(A){}, '@VERSION@' ,{use:['aui-toggler-base','aui-toggler-delegate'], skinnable:true});
 
