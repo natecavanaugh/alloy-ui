@@ -7,7 +7,7 @@ var Lang = A.Lang,
 	CSS_BORDER = A.getClassName(NAME, 'border'),
 	CSS_CROP = A.getClassName(NAME, 'crop'),
 	CSS_OVERLAY = A.getClassName(NAME, 'overlay');
-	CSS_OVERLAY_HIDDEN = A.getClassName(NAME, 'overlay-hidden');
+	CSS_OVERLAY_HOVER = A.getClassName(NAME, 'crop', 'hover');
 
 var ImageCropper = A.Component.create(
 	{
@@ -70,59 +70,6 @@ var ImageCropper = A.Component.create(
 		],
 
 		prototype: {
-			initializer: function(config) {
-				var instance = this;
-
-				var imageNode = instance.get('srcNode');
-				var imageHeight = imageNode.height();
-				var imageWidth = imageNode.width();
-
-				var cropHeight = instance.get('cropHeight');
-				var cropWidth = instance.get('cropWidth');
-				var x = instance.get('x');
-				var y = instance.get('y');
-
-				// Find valid y
-
-				if (y < 0) {
-					y = 0
-				}
-
-				if (y + cropHeight > imageHeight) {
-					y = Math.max(imageHeight - cropHeight, 0);
-				}
-
-				instance.set('y', y);
-
-				// Find valid cropHeight
-
-				if (y + cropHeight > imageHeight) {
-					cropHeight = Math.max(imageHeight - y, 0);
-				}
-
-				instance.set('cropHeight', cropHeight);
-
-				// Find valid x
-
-				if (x < 0) {
-					x = 0
-				}
-
-				if (x + cropWidth > imageWidth) {
-					x = Math.max(imageWidth - cropWidth, 0);
-				}
-
-				instance.set('x', x);
-
-				// Find valid cropWidth
-
-				if (x + cropWidth > imageWidth) {
-					cropWidth = Math.max(imageWidth - x, 0);
-				}
-
-				instance.set('cropWidth', cropWidth);
-			},
-
 			renderUI: function() {
 				var instance = this;
 
@@ -151,13 +98,14 @@ var ImageCropper = A.Component.create(
 					instance.bottomOverlay,
 					instance.leftOverlay,
 					instance.borderNode
-				])
-				.appendTo(boundingBox);
+				]).appendTo(boundingBox);
+
+				instance._boundingBox = boundingBox;
 
 				instance._renderDrag();
 				instance._renderResize();
 
-				instance._hideOverlay();
+				instance._unHoverOverlay();
 			},
 
 			bindUI: function() {
@@ -167,17 +115,66 @@ var ImageCropper = A.Component.create(
 				instance.resize.addTarget(instance);
 
 				instance.on(['drag:drag', 'resize:resize'], instance._positionOverlay);
-				instance.on(['drag:start', 'resize:start'], instance._showOverlay);
-				instance.on(['drag:end', 'resize:end'], instance._hideOverlay);
+				instance.on(['drag:start', 'resize:start'], instance._hoverOverlay);
+				instance.on(['drag:end', 'resize:end'], instance._unHoverOverlay);
 
 				instance.cropNode.hover(
-					A.bind(instance._showOverlay, instance),
-					A.bind(instance._hideOverlay, instance)
+					A.bind(instance._hoverOverlay, instance),
+					A.bind(instance._unHoverOverlay, instance)
 				);
 			},
 
 			syncUI: function() {
 				var instance = this;
+
+				var imageNode = instance.get('srcNode');
+				var imageHeight = imageNode.height();
+				var imageWidth = imageNode.width();
+
+				var cropHeight = instance.get('cropHeight');
+				var cropWidth = instance.get('cropWidth');
+				var x = instance.get('x');
+				var y = instance.get('y');
+
+				// Find valid y
+
+				if (y < 0) {
+					y = 0;
+				}
+
+				if (y + cropHeight > imageHeight) {
+					y = Math.max(imageHeight - cropHeight, 0);
+				}
+
+				instance.set('y', y);
+
+				// Find valid cropHeight
+
+				if (y + cropHeight > imageHeight) {
+					cropHeight = Math.max(imageHeight - y, 0);
+				}
+
+				instance.set('cropHeight', cropHeight);
+
+				// Find valid x
+
+				if (x < 0) {
+					x = 0;
+				}
+
+				if (x + cropWidth > imageWidth) {
+					x = Math.max(imageWidth - cropWidth, 0);
+				}
+
+				instance.set('x', x);
+
+				// Find valid cropWidth
+
+				if (x + cropWidth > imageWidth) {
+					cropWidth = Math.max(imageWidth - x, 0);
+				}
+
+				instance.set('cropWidth', cropWidth);
 
 				instance._uiSetPreserveRatio(instance.get('preserveRatio'));
 			},
@@ -247,17 +244,12 @@ var ImageCropper = A.Component.create(
 				}
 			},
 
-			_hideOverlay: function () {
+			_hoverOverlay: function () {
 				var instance = this;
 
-				if (instance._isDragging() || instance._isResizing()) {
-					return;
+				if (!instance._isDragging() && !instance._isResizing()) {
+					instance._boundingBox.addClass(CSS_OVERLAY_HOVER);
 				}
-
-				instance.topOverlay.addClass(CSS_OVERLAY_HIDDEN);
-				instance.rightOverlay.addClass(CSS_OVERLAY_HIDDEN);
-				instance.bottomOverlay.addClass(CSS_OVERLAY_HIDDEN);
-				instance.leftOverlay.addClass(CSS_OVERLAY_HIDDEN);
 			},
 
 			_isDragging: function () {
@@ -327,7 +319,7 @@ var ImageCropper = A.Component.create(
 
 				// Border
 
-				borderNode.setXY([absoluteX - borderNode.getBorderWidth("l"), absoluteY - borderNode.getBorderWidth("t")]);
+				borderNode.setXY([absoluteX - borderNode.getBorderWidth('l'), absoluteY - borderNode.getBorderWidth('t')]);
 				borderNode.width(cropWidth);
 				borderNode.height(cropHeight);
 			},
@@ -335,15 +327,16 @@ var ImageCropper = A.Component.create(
 			_renderDrag: function() {
 				var instance = this;
 
-				var imageNode = instance.get('srcNode');
-				var cropNode = instance.cropNode;
-
-				var drag = new A.DD.Drag({
-					node: cropNode
-				})
-				.plug(A.Plugin.DDConstrained, {
-					constrain2node: imageNode
-				});
+				var drag = new A.DD.Drag(
+					{
+						node: instance.cropNode
+					}
+				).plug(
+					A.Plugin.DDConstrained,
+					{
+						constrain2node: instance.get('srcNode')
+					}
+				);
 
 				instance.drag = drag;
 			},
@@ -354,30 +347,21 @@ var ImageCropper = A.Component.create(
 				var imageNode = instance.get('srcNode');
 				var cropNode = instance.cropNode;
 
-				var resize = new A.Resize({
-					node: cropNode
-				})
-				.plug(A.Plugin.ResizeConstrained, {
-					constrain: imageNode,
-					preserveRatio: instance.get('preserveRatio'),
-					minHeight: instance.get('minHeight'),
-					minWidth: instance.get('minWidth')
-				});
+				var resize = new A.Resize(
+					{
+						node: cropNode
+					}
+				).plug(
+					A.Plugin.ResizeConstrained,
+					{
+						constrain: imageNode,
+						preserveRatio: instance.get('preserveRatio'),
+						minHeight: instance.get('minHeight'),
+						minWidth: instance.get('minWidth')
+					}
+				);
 
 				instance.resize = resize;
-			},
-
-			_showOverlay: function () {
-				var instance = this;
-
-				if (instance._isDragging() || instance._isResizing()) {
-					return;
-				}
-
-				instance.topOverlay.removeClass(CSS_OVERLAY_HIDDEN);
-				instance.rightOverlay.removeClass(CSS_OVERLAY_HIDDEN);
-				instance.bottomOverlay.removeClass(CSS_OVERLAY_HIDDEN);
-				instance.leftOverlay.removeClass(CSS_OVERLAY_HIDDEN);
 			},
 
 			_uiSetCropHeight: function(value) {
@@ -442,10 +426,13 @@ var ImageCropper = A.Component.create(
 				}
 				else {
 					if (!instance.stopResize) {
-						instance.stopResize = instance.resize.on('resize:resize', function (event) {
-							event.preventDefault();
-							event.stopPropagation();
-						});
+						instance.stopResize = instance.resize.on(
+							'resize:resize',
+							function (event) {
+								event.preventDefault();
+								event.stopPropagation();
+							}
+						);
 					}
 				}
 			},
@@ -474,6 +461,14 @@ var ImageCropper = A.Component.create(
 				cropNode.setY(imageY + value);
 
 				instance._positionOverlay();
+			},
+
+			_unHoverOverlay: function () {
+				var instance = this;
+
+				if (!instance._isDragging() && !instance._isResizing()) {
+					instance._boundingBox.removeClass(CSS_OVERLAY_HOVER);
+				}
 			}
 		}
 	}

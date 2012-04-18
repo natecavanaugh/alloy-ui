@@ -13,17 +13,17 @@
 	cursor: move;
 }
 
-.aui-image-cropper-overlay-hidden {
-	visibility: hidden;
-}
-
 .aui-image-cropper-overlay {
-	background-color: #000;
+	background-color: #FFF;
 	opacity: 0.4;
 	position: absolute;
 	top: 0;
 	left: 0;
 	z-index: 8;
+}
+
+.aui-image-cropper-crop-hover .aui-image-cropper-overlay {
+	background-color: #555;
 }
 
 .aui-image-cropper-crop .yui3-resize-handle-inner {
@@ -36,8 +36,8 @@
 }
 
 .aui-image-cropper-crop .yui3-resize-handle-tr {
-	top: -5px;
 	right: -5px;
+	top: -5px;
 }
 
 .aui-image-cropper-crop .yui3-resize-handle-r {
@@ -63,8 +63,8 @@
 }
 
 .aui-image-cropper-crop .yui3-resize-handle-tl {
-	top: -5px;
 	left: -5px;
+	top: -5px;
 }
 
 .aui-image-cropper-crop .yui3-resize-handle-inner-t {
@@ -109,9 +109,7 @@
 
 /* IE Fixes */
 
-.ie6 .aui-image-cropper-overlay,
-.ie7 .aui-image-cropper-overlay,
-.ie8 .aui-image-cropper-overlay {
+.aui-image-cropper-overlay {
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
 	filter: alpha(opacity=40);
 }
