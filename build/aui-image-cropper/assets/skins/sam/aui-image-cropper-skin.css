@@ -11,8 +11,6 @@
 
 /* IE Fixes */
 
-.ie6 .aui-image-cropper-crop,
-.ie7 .aui-image-cropper-crop,
-.ie8 .aui-image-cropper-crop {
-	background-image: url(spacer.gif);
+.aui-image-cropper-crop {
+	background-image: url(spacer.gif)\9;
 }
