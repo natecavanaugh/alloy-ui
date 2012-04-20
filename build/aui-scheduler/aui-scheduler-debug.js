@@ -3752,5 +3752,5 @@ A.SchedulerCalendar = SchedulerCalendar;
 }, '@VERSION@' ,{requires:['aui-scheduler-event'], skinnable:false});
 
 
-AUI.add('aui-scheduler', function(A){}, '@VERSION@' ,{skinnable:true, use:['aui-scheduler-base','aui-scheduler-view','aui-scheduler-event','aui-scheduler-calendar']});
+AUI.add('aui-scheduler', function(A){}, '@VERSION@' ,{use:['aui-scheduler-base','aui-scheduler-view','aui-scheduler-event','aui-scheduler-calendar'], skinnable:true});
 
