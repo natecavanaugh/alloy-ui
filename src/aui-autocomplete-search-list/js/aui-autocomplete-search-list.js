@@ -1,26 +1,30 @@
-var NAME = 'AutocompleteSearchList',
+var arrayIndexOf = A.Array.indexOf,
+
+	NAME = 'AutocompleteSearchList',
+
+	DOC = A.config.doc,
 
 	ADD = 'add',
 	BLANK = "''",
-	SEARCH = "'Search'",
 	CHECKED = 'checked',
 	CLICK = 'click',
 	COMMA_SPACE = ', ',
-	DEMO = 'demo',
-	DOC = A.config.doc,
+	INPUT_SELECTOR = 'inputSelector',
 	PHRASE_MATCH = 'phraseMatch',
 	REMOVE = 'remove',
 	RENDER = 'render',
+	TAG_SELECTOR = 'tagsSelector',
+	SEARCH = "'Search'",
 	SEARCH_INITIALLY = 'searchInitially',
 	STR_BLANK = '',
 	VALUE = 'value',
 
-	TPL_AC_SEARCH_LIST = '<div class="aui-autocomplete-search-list" />',
+	CSS_NO_MATCHES = 'no-matches',
+
 	TPL_AC_CONTAINER = '<span class="aui-field-content aui-autocomplete-search-list-ac-container">',
 	TPL_AC_INPUT = '<input class="aui-field-input aui-field-input-text" id="ac-input" type="text" name="test-input" value="Search" autocomplete="off" onfocus="if(this.value==' + SEARCH + ') {this.value=' + BLANK + '};" onblur="if(!this.value) {this.value=' + SEARCH + '};this._haschanged=false;"/></span>',
-	TPL_CHECKED = ' checked="checked" ',
-
-	CSS_NO_MATCHES = 'no-matches';
+	TPL_AC_SEARCH_LIST = '<div class="aui-autocomplete-search-list" />',
+	TPL_CHECKED = ' checked="checked" ';
 
 var AutocompleteSearchList = function() {};
 
@@ -91,7 +95,6 @@ A.mix(AutocompleteSearchList, {
 					switch (templateType) {
 						case 'asset-tags-selector':
 						default:
-
 							return A.AutocompleteSearchList.TPL || new A.Template(
 								'<fieldset class="{[(!values.results || !values.results.length) ? "', CSS_NO_MATCHES, '" : "', STR_BLANK ,'" ]}">',
 									'<tpl for="results">',
@@ -99,9 +102,7 @@ A.mix(AutocompleteSearchList, {
 									'</tpl>',
 									'<div class="lfr-tag-message">{noResultsMessage}</div>',
 								'</fieldset>'
-							 );
-
-						break;
+							);
 					}
 				}
 			},
@@ -115,9 +116,8 @@ A.mix(AutocompleteSearchList, {
 			initializer: function(config) {
 				var instance = this;
 
-				var inputSelector = instance.get('inputSelector');
-
-				var tagsSelector = instance.get('tagsSelector');
+				var inputSelector = instance.get(INPUT_SELECTOR);
+				var tagsSelector = instance.get(TAG_SELECTOR);
 
 				if (tagsSelector) {
 					instance.tagsSelector = tagsSelector;
@@ -168,7 +168,7 @@ A.mix(AutocompleteSearchList, {
 
 				bodyNode.append(inputNode);
 				bodyNode.append(entriesNode);
-				
+
 				instance.inputNode = inputNode;
 				instance.entriesNode = entriesNode;
 			},
@@ -195,8 +195,8 @@ A.mix(AutocompleteSearchList, {
 					initialResult,
 					function(item, index, collection)
 					{
-						item.text = item.name;
 						item.checked = item.assetCount;
+						item.text = item.name;
 					}
 				);
 
@@ -215,12 +215,11 @@ A.mix(AutocompleteSearchList, {
 						var entries = instance.entries;
 
 						if (entries) {
-
 							if (instance.tagsSelector) {
 								item.raw.checked = entries.indexOfKey(item.text) > -1 ? TPL_CHECKED : STR_BLANK;
 							}
 							else {
-								item.raw.checked = entries.indexOf(item.text) > -1 ? TPL_CHECKED : STR_BLANK;
+								item.raw.checked = arrayIndexOf(entries, item.text) > -1 ? TPL_CHECKED : STR_BLANK;
 							}
 						}
 
@@ -238,7 +237,7 @@ A.mix(AutocompleteSearchList, {
 
 				data.noResultsMessage = instance.get('noResultsMessage');
 
-				template = instance.get('template');
+				var template = instance.get('template');
 
 				template.render(data, instance.entriesNode);
 			},
@@ -247,28 +246,24 @@ A.mix(AutocompleteSearchList, {
 				var instance = this;
 
 				var checkbox = event.currentTarget;
+
 				var checked = checkbox.get(CHECKED);
 				var checkboxValue = checkbox.val();
 
-				var tagsSelector = instance.get('tagsSelector');
-				
+				var inputSelector = instance.get(INPUT_SELECTOR);
+				var tagsSelector = instance.get(TAG_SELECTOR);
+
 				if (tagsSelector) {
 					var action = checked ? ADD : REMOVE;
 
 					instance.tagsSelector[action](checkboxValue);
 				}
-				else if (instance.get('inputSelector')) {
-					var inputSelector = instance.get('inputSelector');
-
+				else if (inputSelector) {
 					var inputSelectorNode = A.one(inputSelector);
-					
+
 					var nodeValue = inputSelectorNode.val();
 
-					var entries = instance.entries;
-
-					if (!entries) {
-						entries = [];
-					}
+					var entries = instance.entries || [];
 
 					if (checked) {
 						nodeValue = nodeValue ? nodeValue + COMMA_SPACE + checkboxValue : checkboxValue;
@@ -276,22 +271,22 @@ A.mix(AutocompleteSearchList, {
 						entries.push(checkboxValue);
 					}
 					else {
-						var re = new RegExp(COMMA_SPACE + checkboxValue);
-						nodeValue = nodeValue.replace(re, STR_BLANK);
+						var regEx = new RegExp(COMMA_SPACE + checkboxValue);
+						nodeValue = nodeValue.replace(regEx, STR_BLANK);
 
-						re = new RegExp(checkboxValue);
-						nodeValue = nodeValue.replace(re, STR_BLANK);
+						regEx = new RegExp(checkboxValue);
+						nodeValue = nodeValue.replace(regEx, STR_BLANK);
 
 						if (nodeValue.indexOf(COMMA_SPACE) === 0) {
 							nodeValue = nodeValue.substring(2);
 						}
 
-						var index = entries.indexOf(checkboxValue);
+						var index = arrayIndexOf(entries, checkboxValue);
 
 						var updatedEntries = entries.splice(index, 1);
 					}
 
-					inputSelectorNode.set(VALUE, nodeValue);
+					inputSelectorNode.val(nodeValue);
 
 					instance.entries = entries;
 				}
