@@ -9489,6 +9489,7 @@ YUI.add('yui', function(Y){}, '3.4.0' ,{use:['yui-base','get','features','intl-b
 						'aui-aria': {skinnable:false, requires:['aui-base','plugin']},
 						'aui-arraysort': {skinnable:false, requires:['arraysort']},
 						'aui-audio': {skinnable:true, requires:['aui-base','querystring-stringify-simple']},
+						'aui-autocomplete-search-list': {requires:['aui-base', 'aui-template', 'autocomplete', 'autocomplete-highlighters', 'autocomplete-filters', 'plugin'], skinnable:true},
 						'aui-autocomplete': {skinnable:true, requires:['aui-base','aui-overlay-base','datasource','dataschema','aui-form-combobox']},
 						'aui-base': {submodules: {'aui-base-lang': {skinnable:false}, 'aui-base-core': {skinnable:false, requires:['aui-classnamemanager','aui-node','aui-component','aui-debounce','aui-delayed-task','aui-selector','aui-event-base','oop','yui-throttle']} }, skinnable:false, use:['aui-base-core','aui-base-lang']},
 						'aui-button-item': {skinnable:true, requires:['aui-base','aui-state-interaction','widget-child']},
