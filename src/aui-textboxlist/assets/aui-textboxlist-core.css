@@ -49,3 +49,18 @@
 .aui-textboxlistentry-focused .aui-textboxlistentry-close {
 	background-color: #fff;
 }
+
+.aui-textboxlist-aria {
+	display: none;
+}
+
+.aui-textboxlist-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.aui-textboxlist-item-active {
+	background-color: #598bec;
+	color: #FFF;
+}
