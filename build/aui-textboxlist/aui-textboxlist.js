@@ -14,6 +14,8 @@ var Lang = A.Lang,
 
 	BOUNDING_BOX = 'boundingBox',
 	CONTENT_BOX = 'contentBox',
+	INPUT_NODE = 'inputNode',
+	ITEM_NAME = 'itemName',
 
 	CONFIG_ANIM = {
 		from: {
@@ -97,11 +99,22 @@ var TextboxList = A.Component.create(
 		 * @static
 		 */
 		ATTRS: {
+			align: {
+				value: {
+					node: CONTENT_BOX,
+					points: ['tl', 'bl']
+				}
+			},
 			allowAnyEntry: {
 				value: false
 			},
 			delimChar: {
 				value: ''
+			},
+			inputNode: {
+				valueFn: function() {
+					return A.Node.create('<input type="text"/>');
+				}
 			},
 			tabIndex: {
 				value: 0
@@ -120,14 +133,12 @@ var TextboxList = A.Component.create(
 			initializer: function(config) {
 				var instance = this;
 
-				var matchKey = instance.get('matchKey');
-
 				instance.entries = new A.DataSet(
 					{
 						getKey: function(obj) {
 							var instance = this;
 
-							return obj[matchKey];
+							return obj[ITEM_NAME];
 						}
 					}
 				);
@@ -145,10 +156,9 @@ var TextboxList = A.Component.create(
 				var instance = this;
 
 				instance._renderEntryHolder();
+				instance._renderInput();
 
 				TextboxList.superclass.renderUI.apply(instance, arguments);
-
-				instance._overlayAlign.node = instance.get(BOUNDING_BOX);
 			},
 
 			/**
@@ -162,7 +172,6 @@ var TextboxList = A.Component.create(
 
 				TextboxList.superclass.bindUI.apply(instance, arguments);
 
-				instance.after('itemSelect', instance._afterItemSelect);
 				instance.after('focusedChange', instance._afterTBLFocusedChange);
 				instance.on('click', instance._onBoundingBoxClick);
 
@@ -189,18 +198,19 @@ var TextboxList = A.Component.create(
 				instance.inputNode.on('focus', instance._onInputNodeFocus, instance);
 			},
 
-			add: function(label) {
+			add: function(item) {
 				var instance = this;
 
-				var entry = instance._prepareEntry(label);
+				var entry = instance._prepareEntry(item);
 
 				instance.entries.add(entry);
 			},
-									 
+
 			addEntries: function(instance) {
 				var instance = this;
+
 				var inputNode = instance.inputNode;
-				
+
 				instance.entries.add(inputNode.val(), {});
 			},
 
@@ -218,11 +228,12 @@ var TextboxList = A.Component.create(
 				return instance.entries.removeKey(label);
 			},
 
-			_afterItemSelect: function(elListItem) {
+			selectItem: function(itemNode) {
 				var instance = this;
 
-				instance.entries.add(elListItem._resultData);
+				var item = itemNode._data.result.text;
 
+				instance.add(item);
 			},
 
 			_afterTBLFocusedChange: function(event) {
@@ -344,23 +355,14 @@ var TextboxList = A.Component.create(
 				}
 			},
 
-			_prepareEntry: function(label) {
+			_prepareEntry: function(item) {
 				var instance = this;
 
 				var entry = {};
-				var matchKey = instance.get('matchKey');
 
-				entry[matchKey] = label;
+				entry[ITEM_NAME] = item;
 
 				return entry;
-			},
-
-			_realignContainer: function(event) {
-				var instance = this;
-
-				instance.overlay.set('width', instance.get(BOUNDING_BOX).get('offsetWidth'));
-
-				TextboxList.superclass._realignContainer.apply(instance, arguments);
 			},
 
 			_removeItem: function(event) {
@@ -390,21 +392,12 @@ var TextboxList = A.Component.create(
 				var instance = this;
 
 				var contentBox = instance.get(CONTENT_BOX);
-				var input = instance.get('input');
+				var input = instance.get(INPUT_NODE);
 
 				var fieldConfig = {
-					labelText: false
+					labelText: false,
+					node: input
 				};
-
-				var inputParent = null;
-
-				if (input) {
-					input = A.one(input);
-
-					fieldConfig.node = input;
-
-					inputParent = input.get('parentNode');
-				}
 
 				var inputContainer = A.Node.create(TPL_INPUT_CONTAINER);
 
@@ -420,9 +413,6 @@ var TextboxList = A.Component.create(
 				instance.inputContainer = inputContainer;
 				instance.inputField = inputField;
 				instance.inputNode = inputField.get('node');
-				instance.button = new A.ButtonItem();
-
-				instance.set('uniqueName', A.stamp(instance.inputNode));
 			},
 
 			_updateEntryHolder: function(event) {
@@ -434,9 +424,7 @@ var TextboxList = A.Component.create(
 				var item = event.item;
 				var index = event.index;
 
-				var matchKey = instance.get('matchKey');
-
-				var key = item[matchKey] || event.attrName;
+				var key = item[ITEM_NAME] || event.attrName;
 
 				if (key) {
 					if (eventType == 'dataset:add') {
@@ -505,11 +493,10 @@ var TextboxListEntry = A.Component.create(
 				var instance = this;
 
 				var contentBox = instance.get(CONTENT_BOX);
-
-				var text = A.Node.create(TPL_ENTRY_TEXT);
-				var close = A.Node.create(TPL_ENTRY_CLOSE);
-
 				var labelText = instance.get('labelText');
+
+				var close = A.Node.create(TPL_ENTRY_CLOSE);
+				var text = A.Node.create(TPL_ENTRY_TEXT);
 
 				text.set('innerHTML', labelText);
 
@@ -523,4 +510,4 @@ var TextboxListEntry = A.Component.create(
 A.TextboxList = TextboxList;
 A.TextboxListEntry = TextboxListEntry;
 
-}, '@VERSION@' ,{requires:['anim-node-plugin','aui-autocomplete','node-focusmanager'], skinnable:true});
+}, '@VERSION@' ,{skinnable:true, requires:['anim-node-plugin','aui-base','aui-data-set','aui-form-textfield','autocomplete','autocomplete-filters','autocomplete-highlighters']});
