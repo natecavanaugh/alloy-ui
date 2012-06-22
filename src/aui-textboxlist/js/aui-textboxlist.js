@@ -49,7 +49,7 @@ var Lang = A.Lang,
 	CSS_ENTRY_TEXT = getClassName(ENTRY_NAME, 'text'),
 	CSS_ENTRY_ITEM = getClassName(ENTRY_NAME, 'item'),
 
-	CSS_INPUT_CONTAINER = getClassName(NAME, 'input','container'),
+	CSS_INPUT_CONTAINER = getClassName(NAME, 'input', 'container'),
 
 	BACKSPACE = 'BACKSPACE',
 	ENTER = 'ENTER',
@@ -98,6 +98,9 @@ var TextboxList = A.Component.create(
 		 * @static
 		 */
 		ATTRS: {
+			activateFirstItem: {
+				value: true
+			},
 			align: {
 				value: {
 					node: CONTENT_BOX,
@@ -205,7 +208,7 @@ var TextboxList = A.Component.create(
 				instance.entries.add(entry);
 			},
 
-			addEntries: function(instance) {
+			addEntries: function() {
 				var instance = this;
 
 				var inputNode = instance.inputNode;
@@ -229,6 +232,8 @@ var TextboxList = A.Component.create(
 
 			selectItem: function(itemNode) {
 				var instance = this;
+
+				TextboxList.superclass.selectItem.apply(instance, arguments);
 
 				var item = itemNode._data.result.text;
 
@@ -296,7 +301,7 @@ var TextboxList = A.Component.create(
 						if (unselected) {
 							currentSelectedEntry = lastEntryIndex;
 						}
-						else if (lastSelectedEntry == 0) {
+						else if (lastSelectedEntry === 0) {
 							currentSelectedEntry = lastSelectedEntry;
 						}
 						else {
@@ -423,11 +428,13 @@ var TextboxList = A.Component.create(
 				var item = event.item;
 				var index = event.index;
 
+				var entry;
+
 				var key = item[ITEM_NAME] || event.attrName;
 
 				if (key) {
 					if (eventType == 'dataset:add') {
-						var entry = new TextboxListEntry(
+						entry = new TextboxListEntry(
 							{
 								labelText: key
 							}
@@ -450,7 +457,7 @@ var TextboxList = A.Component.create(
 					else if (eventType == 'dataset:replace') {
 						inputNode.val('');
 
-						var entry = event.prevVal.entry;
+						entry = event.prevVal.entry;
 
 						item.entry = entry;
 
