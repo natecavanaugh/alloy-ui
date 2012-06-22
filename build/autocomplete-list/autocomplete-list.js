@@ -183,7 +183,7 @@ List = Y.Base.create('autocompleteList', Y.Widget, [
      * @see show
      * @chainable
      */
-    hide: function () {
+    hide: function () {console.log('hide');
         return this.get(ALWAYS_SHOW_LIST) ? this : this.set(VISIBLE, false);
     },
 

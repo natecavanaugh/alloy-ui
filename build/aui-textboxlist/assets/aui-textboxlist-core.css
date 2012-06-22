@@ -60,7 +60,25 @@
 	padding: 0;
 }
 
-.aui-textboxlist-item-active {
-	background-color: #598bec;
-	color: #FFF;
+.aui-textboxlist-item {
+	border: 1px solid #fff;
+	list-style: none;
+	margin: 0;
+	padding: 0 3px;
+}
+
+.aui-textboxlist-results-content {
+	border: 1px solid #98c0f4;
+	height: 100%;
+	overflow-y: auto;
+}
+
+.aui-textboxlist-item-active, .aui-textboxlist-item-hover {
+	background: #dfe8f6;
+	border-color: #a3bae9;
+	cursor: pointer;
+}
+
+.aui-textboxlist-hidden .aui-textboxlist-list {
+	display: none !important;
 }
