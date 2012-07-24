@@ -2279,12 +2279,16 @@ AUI.add('aui-media-viewer-plugin', function(A) {
 
 var Lang = A.Lang,
 	Do = A.Do,
+	IE = A.UA.ie,
 
+	STR_ABOUT_BLANK = 'about:blank',
 	STR_BODY = 'body',
 	STR_HREF = 'href',
+	STR_IFRAME = 'iframe',
 	STR_IMAGE = 'image',
 	STR_LOADING = 'loading',
 	STR_PROVIDERS = 'providers',
+	STR_SRC = 'src',
 
 	NAME = 'mediaViewerPlugin',
 
@@ -2371,6 +2375,10 @@ var MediaViewerPlugin = A.Component.create(
 				var mediaType = instance._getMediaType(source.attr('href'));
 
 				if (mediaType != STR_IMAGE) {
+					if (IE == 9) {
+						instance._redirectIframe(STR_ABOUT_BLANK);
+					}
+
 					host.setStdModContent(STR_BODY, '');
 				}
 			},
@@ -2383,6 +2391,10 @@ var MediaViewerPlugin = A.Component.create(
 				var mediaType = instance._getMediaType(linkHref);
 
 				var result = true;
+
+				if (IE == 9) {
+					instance._redirectIframe(STR_ABOUT_BLANK);
+				}
 
 				if (mediaType != STR_IMAGE) {
 					var providers = instance.get(STR_PROVIDERS)[mediaType];
@@ -2474,6 +2486,22 @@ var MediaViewerPlugin = A.Component.create(
 				return mediaType;
 			},
 
+			_redirectIframe: function(source) {
+				var instance = this;
+
+				var host = instance.get('host');
+
+				var bodyNode = host.bodyNode;
+
+				if (bodyNode) {
+					var iframe = bodyNode.one(STR_IFRAME);
+
+					if (iframe) {
+						iframe.set(STR_SRC, source);
+					}
+				}
+			},
+
 			_restoreMedia: function(event) {
 				var instance = this;
 
@@ -2551,5 +2579,5 @@ A.MediaViewer = A.ImageViewer;
 }, '@VERSION@' ,{requires:['aui-image-viewer-base'], skinnable:false});
 
 
-AUI.add('aui-image-viewer', function(A){}, '@VERSION@' ,{use:['aui-image-viewer-base','aui-image-viewer-gallery','aui-media-viewer-plugin'], skinnable:true});
+AUI.add('aui-image-viewer', function(A){}, '@VERSION@' ,{skinnable:true, use:['aui-image-viewer-base','aui-image-viewer-gallery','aui-media-viewer-plugin']});
 
