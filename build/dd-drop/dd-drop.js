@@ -116,6 +116,16 @@ YUI.add('dd-drop', function(Y) {
         */        
         groups: {
             value: ['default'],
+            getter: function() {
+                if (!this._groups) {
+                    this._groups = {};
+                }
+                var ret = [];
+                Y.each(this._groups, function(v, k) {
+                    ret[ret.length] = k;
+                });
+                return ret;
+            },            
             setter: function(g) {
                 this._groups = {};
                 Y.each(g, function(v, k) {
@@ -537,8 +547,8 @@ YUI.add('dd-drop', function(Y) {
                     if (DDM.activeDrag) {
                         this.get(NODE).removeClass(DDM.CSS_PREFIX + '-drop-over');
                         DDM.activeDrag.get(NODE).removeClass(DDM.CSS_PREFIX + '-drag-over');
-                        this.fire(EV_DROP_EXIT);
-                        DDM.activeDrag.fire('drag:exit', { drop: this });
+                        this.fire(EV_DROP_EXIT, { drop: this, drag: DDM.activeDrag });
+                        DDM.activeDrag.fire('drag:exit', { drop: this, drag: DDM.activeDrag });
                         delete DDM.otherDrops[this];
                     }
                 }

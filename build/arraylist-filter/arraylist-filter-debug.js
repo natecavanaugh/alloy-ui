@@ -11,6 +11,7 @@ YUI.add('arraylist-filter', function(Y) {
  * Collection utilities beyond what is provided in the YUI core
  * @module collection
  * @submodule arraylist-filter
+ * @deprecated Use ModelList or a custom subclass implementation
  */
 
 /*
@@ -29,6 +30,7 @@ Y.mix(Y.ArrayList.prototype, {
      * @param { Function } validator Boolean function to determine in or out.
      * @return { ArrayList } New instance based on who passed the validator.
      * @for ArrayList
+     * @deprecated Use ModelList or a custom subclass implementation
      */
     filter: function(validator) {
         var items = [];

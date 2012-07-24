@@ -58,11 +58,13 @@ AUI().ready('aui-tree-view', 'aui-tooltip', 'datatype-xml', 'dataschema-xml', fu
 	console.log(arguments);
 	new A.Tooltip({ trigger: '#tree1', bodyContent: 'Mouseover the tree to activate the Drag&Drop.', width: 150 }).render();
 
-	var defCallback = function(event) {
-		if (window.console && window.console.log) {
+	var defCallback = null;
+
+	if (window.console && window.console.log) {
+		defCallback = function(event) {
 			console.log(event.type, event);
-		}
-	};
+		};
+	}
 
 	// creating from constructor A.TreeNode
 	var fileRoot1 = new A.TreeNode({ label: 'File ROOT 1', id: 'fileRoot1' });
@@ -128,7 +130,7 @@ AUI().ready('aui-tree-view', 'aui-tooltip', 'datatype-xml', 'dataschema-xml', fu
 					children: [
 						{
 							label: 'Folder1-1',
-							id: 'folder1-1',
+							// id: 'folder1-1',
 							leaf: false,
 							expanded: false,
 							children: [

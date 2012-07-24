@@ -62,7 +62,7 @@ YUI.add('createlink-base', function(Y) {
 
 
                 this.get('host')._execCommand(cmd, url);
-                sel = new inst.Selection();
+                sel = new inst.EditorSelection();
                 out = sel.getSelected();
                 if (!sel.isCollapsed && out.size()) {
                     //We have a selection

@@ -12,6 +12,7 @@ YUI.add('datatype-date-format', function(Y) {
  * convenience methods for various JavaScript object types.
  *
  * @module datatype
+ * @main datatype
  */
 
 /**

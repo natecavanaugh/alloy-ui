@@ -2129,5 +2129,5 @@ PrintFix();
 }, '@VERSION@' ,{requires:['aui-node-html5']});
 
 
-AUI.add('aui-node', function(A){}, '@VERSION@' ,{skinnable:false, use:['aui-node-base','aui-node-html5','aui-node-html5-print']});
+AUI.add('aui-node', function(A){}, '@VERSION@' ,{use:['aui-node-base','aui-node-html5','aui-node-html5-print'], skinnable:false});
 

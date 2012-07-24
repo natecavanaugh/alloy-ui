@@ -78,7 +78,7 @@ YUI.add('editor-lists', function(Y) {
                     }
                     //Selection here..
                     Y.log('Selecting the new node', 'info', 'editorLists');
-                    (new inst.Selection()).selectNode(li, true, focusEnd);
+                    (new inst.EditorSelection()).selectNode(li, true, focusEnd);
                 }
             }
         },

@@ -556,4 +556,4 @@ var ImageCropper = A.Component.create(
 
 A.ImageCropper = ImageCropper;
 
-}, '@VERSION@' ,{skinnable:true, requires:['widget','aui-base','resize','dd-constrain']});
+}, '@VERSION@' ,{requires:['widget','aui-base','resize','dd-constrain'], skinnable:true});

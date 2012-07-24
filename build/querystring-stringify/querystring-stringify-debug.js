@@ -116,4 +116,4 @@ QueryString.stringify = function (obj, c, name) {
 };
 
 
-}, '3.4.0' ,{requires:['yui-base']});
+}, '3.4.0' ,{requires:['yui-base'], supersedes:['querystring-stringify-simple']});

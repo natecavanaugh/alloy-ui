@@ -182,4 +182,4 @@ if (useHistoryHTML5 === true || (useHistoryHTML5 !== false &&
 }
 
 
-}, '3.4.0' ,{requires:['event-base', 'history-base', 'node-base'], optional:['json']});
+}, '3.4.0' ,{optional:['json'], requires:['event-base', 'history-base', 'node-base']});
