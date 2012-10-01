@@ -72,7 +72,7 @@ var L = A.Lang,
 	},
 	MAP_RATING_EL_DISABLED = {
 		tagName: 'a',
-		attrs: 'href="'+HREF_JAVASCRIPT+'"'
+		attrs: ' href="'+HREF_JAVASCRIPT+'"'
 	},
 	TPL_RATING_EL = '<a href="'+HREF_JAVASCRIPT+'"></a>',
 	TPL_RATING_EL_DISABLED = '<span></span>',
@@ -80,7 +80,7 @@ var L = A.Lang,
 	FN_GET_RATING_TPL = function(disabled) {
 		var map = disabled ? MAP_RATING_EL_DISABLED : MAP_RATING_EL;
 
-		var buffer = ['<',map.tagName, map.attrs, TPL_RATING_CLASS_ATTR, '>','</',map.tagName,'>'];
+		var buffer = ['<', map.tagName, map.attrs, TPL_RATING_CLASS_ATTR, '>', '</', map.tagName, '>'];
 
 		return buffer.join('');
 	};
@@ -1001,4 +1001,4 @@ A.Rating = Rating;
 A.StarRating = Rating;
 A.ThumbRating = ThumbRating;
 
-}, '@VERSION@' ,{requires:['aui-base'], skinnable:true});
+}, '@VERSION@' ,{skinnable:true, requires:['aui-base']});
