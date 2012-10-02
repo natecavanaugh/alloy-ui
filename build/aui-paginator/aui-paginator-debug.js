@@ -16,7 +16,6 @@ var L = A.Lang,
 	toInt = L.toInt,
 
 	ALWAYS_VISIBLE = 'alwaysVisible',
-	BOUNDING_BOX = 'boundingBox',
 	CIRCULAR = 'circular',
 	CONTAINER = 'container',
 	CONTAINERS = 'containers',
@@ -51,7 +50,6 @@ var L = A.Lang,
 	ROWS_PER_PAGE = 'rowsPerPage',
 	ROWS_PER_PAGE_EL = 'rowsPerPageEl',
 	ROWS_PER_PAGE_OPTIONS = 'rowsPerPageOptions',
-	SELECT = 'select',
 	SELECTED = 'selected',
 	SPACE = ' ',
 	STATE = 'state',
@@ -577,7 +575,7 @@ var Paginator = A.Component.create(
 			 */
 			rowsPerPageOptions: {
 				validator: isArray,
-				value: {}
+				value: []
 			},
 
 			/**
@@ -1226,17 +1224,15 @@ var Paginator = A.Component.create(
 			_renderRowsPerPageOptions: function() {
 				var instance = this;
 
-				var i = 0;
-
 				var rowsPerPageEl = instance.get(ROWS_PER_PAGE_EL);
 				var rowsPerPageOptions = instance.get(ROWS_PER_PAGE_OPTIONS);
 
 				A.each(
 					rowsPerPageOptions,
-					function(value) {
+					function(item, index, collection) {
 						var rowsPerPageDOM = rowsPerPageEl.getDOM();
 
-						rowsPerPageDOM.options[i++] = new Option(value, value);
+						rowsPerPageDOM.options[index] = new Option(item, item);
 					}
 				);
 			},
