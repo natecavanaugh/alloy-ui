@@ -249,15 +249,9 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var label = instance.get(LAST_PAGE_LINK_LABEL);
+					var node = A.Node.create(instance.configTpl.lastLink);
 
-					var configTpl = instance.configTpl;
-
-					var lastLink = configTpl.lastLink;
-
-					var node = A.Node.create(configTpl.lastLink);
-
-					return node.html(label);
+					return node.html(instance.get(LAST_PAGE_LINK_LABEL));
 				}
 			},
 
@@ -287,10 +281,8 @@ var Paginator = A.Component.create(
 				getter: function(value) {
 					var instance = this;
 
-					var totalPages = instance.get(TOTAL_PAGES);
-
 					// maxPageLinks cannot be bigger than totalPages
-					return Math.min(totalPages, value);
+					return Math.min(instance.get(TOTAL_PAGES), value);
 				},
 				validator: isNumber,
 				value: 10
@@ -309,15 +301,9 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var label = instance.get(NEXT_PAGE_LINK_LABEL);
+					var node = A.Node.create(instance.configTpl.nextLink);
 
-					var configTpl = instance.configTpl;
-
-					var nextLink = configTpl.nextLink;
-
-					var node = A.Node.create(nextLink);
-
-					return node.html(label);
+					return node.html(instance.get(NEXT_PAGE_LINK_LABEL));
 				}
 			},
 
@@ -363,9 +349,7 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var configTpl = instance.configTpl;
-
-					return configTpl.pageContainer;
+					return instance.configTpl.pageContainer;
 				}
 			},
 
@@ -402,17 +386,13 @@ var Paginator = A.Component.create(
 				getter: function(value) {
 					var node = A.Node.create(value);
 
-					var paginatorLinkCSS = concat(CSS_PAGINATOR_LINK, CSS_PAGINATOR_PAGE_LINK);
-
-					return node.addClass(paginatorLinkCSS);
+					return node.addClass(concat(CSS_PAGINATOR_LINK, CSS_PAGINATOR_PAGE_LINK));
 				},
 				validator: isString,
 				valueFn: function() {
 					var instance = this;
 
-					var configTpl = instance.configTpl;
-
-					return configTpl.pageLink;
+					return instance.configTpl.pageLink;
 				}
 			},
 
@@ -428,15 +408,9 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var label = instance.get(PAGE_REPORT_LABEL_TEMPLATE);
+					var node = A.Node.create(instance.configTpl.pageReport);
 
-					var configTpl = instance.configTpl;
-
-					var pageReport = configTpl.pageReport;
-
-					var node = A.Node.create(pageReport);
-
-					return node.html(label);
+					return node.html(instance.get(PAGE_REPORT_LABEL_TEMPLATE));
 				}
 			},
 
@@ -454,18 +428,11 @@ var Paginator = A.Component.create(
 				getter: function() {
 					var instance = this;
 
-					var page = instance.get(PAGE);
-					var totalPages = instance.get(TOTAL_PAGES);
-
-					var configTpl = instance.configTpl;
-
-					var pageReportLabel = configTpl.pageReportLabel;
-
 					return L.sub(
-						pageReportLabel,
+						instance.configTpl.pageReportLabel,
 						{
-							page: page,
-							totalPages: totalPages
+							page: instance.get(PAGE),
+							totalPages: instance.get(TOTAL_PAGES)
 						}
 					);
 				},
@@ -485,15 +452,9 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var label = instance.get(PREV_PAGE_LINK_LABEL);
+					var node = A.Node.create(instance.configTpl.prevLink);
 
-					var configTpl = instance.configTpl;
-
-					var prevLink = configTpl.prevLink;
-
-					var node = A.Node.create(prevLink);
-
-					return node.html(label);
+					return node.html(instance.get(PREV_PAGE_LINK_LABEL));
 				}
 			},
 
@@ -552,11 +513,7 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var configTpl = instance.configTpl;
-
-					var rowsPerPage = configTpl.rowsPerPage;
-
-					var node = A.Node.create(rowsPerPage);
+					var node = A.Node.create(instance.configTpl.rowsPerPage);
 
 					return node.addClass(CSS_PAGINATOR_ROWS_PER_PAGE);
 				}
@@ -609,9 +566,7 @@ var Paginator = A.Component.create(
 				valueFn: function() {
 					var instance = this;
 
-					var configTpl = instance.configTpl;
-
-					return configTpl.defaultOutput;
+					return instance.configTpl.defaultOutput;
 				}
 			},
 
@@ -639,15 +594,9 @@ var Paginator = A.Component.create(
 				getter: function() {
 					var instance = this;
 
-					var label = instance.get(TOTAL_LABEL);
+					var node = A.Node.create(instance.configTpl.total);
 
-					var configTpl = instance.configTpl;
-
-					var total = configTpl.total;
-
-					var node = A.Node.create(total);
-
-					return node.html(label);
+					return node.html(instance.get(TOTAL_LABEL));
 				},
 				setter: A.one
 			},
@@ -663,16 +612,10 @@ var Paginator = A.Component.create(
 				getter: function() {
 					var instance = this;
 
-					var total = instance.get(TOTAL);
-
-					var configTpl = instance.configTpl;
-
-					var totalLabel = configTpl.totalLabel;
-
 					return L.sub(
-						totalLabel,
+						instance.configTpl.totalLabel,
 						{
-							total: total
+							total: instance.get(TOTAL)
 						}
 					);
 				},
@@ -876,9 +819,7 @@ var Paginator = A.Component.create(
 			eachContainer: function(fn) {
 				var instance = this;
 
-				var containers = instance.get(CONTAINERS);
-
-				containers.each(
+				instance.get(CONTAINERS).each(
 					function(node) {
 						if (node) {
 							fn.apply(instance, arguments);
@@ -1001,7 +942,8 @@ var Paginator = A.Component.create(
 									try {
 										rowsPerPage = event.target.val();
 									}
-									catch(e) {}
+									catch(e) {
+									}
 
 									instance.set(PAGE, 1);
 
@@ -1310,12 +1252,11 @@ var Paginator = A.Component.create(
 			_syncPageLinksUI: function() {
 				var instance = this;
 
-				var containers = instance.get(CONTAINERS);
 				var page = instance.get(PAGE);
 
 				var range = instance.calculateRange(page);
 
-				containers.each(
+				instance.get(CONTAINERS).each(
 					function(node) {
 						var index = 0;
 						var pageNumber = range.start;
@@ -1355,10 +1296,9 @@ var Paginator = A.Component.create(
 			_syncPageReportUI: function(event) {
 				var instance = this;
 
-				var containers = instance.get(CONTAINERS);
 				var pageReportLabel = instance.get(PAGE_REPORT_LABEL_TEMPLATE);
 
-				containers.each(
+				instance.get(CONTAINERS).each(
 					function(node) {
 						var pageReportEl = node.one(DOT + CSS_PAGINATOR_PAGE_REPORT);
 
