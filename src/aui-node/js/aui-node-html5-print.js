@@ -438,7 +438,11 @@ A.mix(
 
 				var head = DOC.documentElement.firstChild;
 
-				head.insertBefore(styleSheet, head.firstChild);
+				var firstChild = head.firstChild;
+
+				if (firstChild) {
+					head.insertBefore(styleSheet, firstChild);
+				}
 
 				styleSheet.media = 'print';
 				styleSheet.className = CSS_PRINTFIX;
