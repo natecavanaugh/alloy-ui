@@ -211,6 +211,38 @@ A.extend(
 		},
 
 		/**
+     * Applies standard class names to the boundingBox and contentBox
+     *
+     * @method _renderBoxClassNames
+     * @protected
+     */
+    _renderBoxClassNames : function() {
+        var classes = this._getClasses(),
+            cl,
+            boundingBox = this.get('boundingBox'),
+            i,
+            boundingBoxNode,
+            buffer = [];
+
+        boundingBoxNode = boundingBox._node;
+
+        buffer = boundingBoxNode.className.split(' ');
+
+        buffer.push(getClassName());
+
+        // Start from Widget Sub Class
+        for (i = classes.length-3; i >= 0; i--) {
+            cl = classes[i];
+            buffer.push(cl.CSS_PREFIX || _getClassName(cl.NAME.toLowerCase()));
+        }
+        
+        boundingBoxNode.className = A.Array.dedupe(buffer).join(' ');
+
+        // Use instance based name for content box
+        this.get('contentBox').addClass(getClassName('content'));
+    },
+
+		/**
 		 * Renders the Component based upon a passed in interaction.
 		 *
 		 * @method _renderInteraction
