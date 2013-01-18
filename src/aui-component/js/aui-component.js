@@ -95,8 +95,8 @@ Component.ATTRS = {
 
 	/**
 	 * css class added to hide the <code>boundingBox</code> when
-     * <a href="Component.html#config_visible">visible</a> is set to
-     * <code>false</code>.
+	 * <a href="Component.html#config_visible">visible</a> is set to
+	 * <code>false</code>.
 	 *
 	 * @attribute hideClass
 	 * @default 'aui-helper-hidden'
@@ -108,7 +108,7 @@ Component.ATTRS = {
 
 	/**
 	 * If <code>true</code> the render phase will be autimatically invoked
-     * preventing the <code>.render()</code> manual call.
+	 * preventing the <code>.render()</code> manual call.
 	 *
 	 * @attribute render
 	 * @default false
@@ -163,7 +163,7 @@ A.extend(
 
 		/**
 		 * Toggle the visibility of the Panel toggling the value of the
-	     * <a href="Widget.html#config_visible">visible</a> attribute.
+		 * <a href="Widget.html#config_visible">visible</a> attribute.
 		 *
 		 * @method toggle
 		 * @param visible Force the visibility of the component to this state.
@@ -211,36 +211,36 @@ A.extend(
 		},
 
 		/**
-     * Applies standard class names to the boundingBox and contentBox
-     *
-     * @method _renderBoxClassNames
-     * @protected
-     */
-    _renderBoxClassNames : function() {
-        var classes = this._getClasses(),
-            cl,
-            boundingBox = this.get('boundingBox'),
-            i,
-            boundingBoxNode,
-            buffer = [];
+		 * Applies standard class names to the boundingBox and contentBox
+		 *
+		 * @method _renderBoxClassNames
+		 * @protected
+		 */
+		_renderBoxClassNames : function() {
+			var instance = this;
 
-        boundingBoxNode = boundingBox._node;
+			var buffer = [];
+			var classArray;
 
-        buffer = boundingBoxNode.className.split(' ');
+			var boundingBoxNode = instance.get('boundingBox')._node;
+			var contentBox = instance.get('contentBox');
 
-        buffer.push(getClassName());
+			var classes = instance._getClasses();
 
-        // Start from Widget Sub Class
-        for (i = classes.length-3; i >= 0; i--) {
-            cl = classes[i];
-            buffer.push(cl.CSS_PREFIX || _getClassName(cl.NAME.toLowerCase()));
-        }
-        
-        boundingBoxNode.className = A.Array.dedupe(buffer).join(' ');
+			buffer = boundingBoxNode.className.split(' ');
 
-        // Use instance based name for content box
-        this.get('contentBox').addClass(getClassName('content'));
-    },
+			buffer.push(getClassName());
+
+			for (var i = classes.length-3; i >= 0; i--) {
+				classArray = classes[i];
+
+				buffer.push(classArray.CSS_PREFIX || _getClassName(classArray.NAME.toLowerCase()));
+			}
+
+			boundingBoxNode.className = A.Array.dedupe(buffer).join(' ');
+
+			contentBox.addClass(getClassName('content'));
+		},
 
 		/**
 		 * Renders the Component based upon a passed in interaction.
@@ -325,7 +325,7 @@ A.extend(
 
 		/**
 		 * Applies the CSS classes to the <code>boundingBox</code> and
-         * <code>contentBox</code>.
+		 * <code>contentBox</code>.
 		 *
 		 * @method _uiSetCssClass
 		 * @protected
