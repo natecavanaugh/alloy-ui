@@ -24,7 +24,7 @@
 		margin-bottom: 1em;
 	}
 </style>
-<body>
+<body class="yui3-skin-sam">
 
 <div id="wrapper">
 	<h1>Alloy Ace Editor Wrapper</h1>
@@ -40,8 +40,9 @@
 	</div>
 	<div id="editor"></div>
 </div>
+
 <script type="text/javascript" charset="utf-8">
-AUI().ready('aui-ace-editor', function(A) {
+AUI().ready('aui-ace-editor', 'aui-ace-autocomplete', function(A) {
 	var editor = new A.AceEditor(
 		{
 			boundingBox: '#editor',
@@ -53,6 +54,25 @@ AUI().ready('aui-ace-editor', function(A) {
 			// useWrapMode: true,
 			// showPrintMargin: false,
 			mode: 'javascript',
+			plugins: [
+				{
+					fn: A.Plugin.AceAutoComplete,
+					cfg: {
+						processor: new A.AceEditor.AutoCompleteFreemarker(
+							{
+								io: {
+									uri: 'The URL here',
+									data: 'Any custom data here'
+								}
+							}
+						),
+						render: true,
+						visible: false,
+						width: 250,
+						zIndex: 10000
+					}
+				}
+			],
 			value: 'alert("Write something here...");'
 		}
 	).render();
