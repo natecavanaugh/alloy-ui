@@ -96,8 +96,8 @@ Component.ATTRS = {
 
 	/**
 	 * css class added to hide the <code>boundingBox</code> when
-     * <a href="Component.html#config_visible">visible</a> is set to
-     * <code>false</code>.
+	 * <a href="Component.html#config_visible">visible</a> is set to
+	 * <code>false</code>.
 	 *
 	 * @attribute hideClass
 	 * @default 'aui-helper-hidden'
@@ -109,7 +109,7 @@ Component.ATTRS = {
 
 	/**
 	 * If <code>true</code> the render phase will be autimatically invoked
-     * preventing the <code>.render()</code> manual call.
+	 * preventing the <code>.render()</code> manual call.
 	 *
 	 * @attribute render
 	 * @default false
@@ -164,7 +164,7 @@ A.extend(
 
 		/**
 		 * Toggle the visibility of the Panel toggling the value of the
-	     * <a href="Widget.html#config_visible">visible</a> attribute.
+		 * <a href="Widget.html#config_visible">visible</a> attribute.
 		 *
 		 * @method toggle
 		 * @param visible Force the visibility of the component to this state.
@@ -209,6 +209,38 @@ A.extend(
 			var instance = this;
 
 			instance._uiSetCssClass(event.newVal, event.prevVal);
+		},
+
+		/**
+		 * Applies standard class names to the boundingBox and contentBox
+		 *
+		 * @method _renderBoxClassNames
+		 * @protected
+		 */
+		_renderBoxClassNames : function() {
+			var instance = this;
+
+			var buffer = [];
+			var classArray;
+
+			var boundingBoxNode = instance.get('boundingBox')._node;
+			var contentBox = instance.get('contentBox');
+
+			var classes = instance._getClasses();
+
+			buffer = boundingBoxNode.className.split(' ');
+
+			buffer.push(getClassName());
+
+			for (var i = classes.length-3; i >= 0; i--) {
+				classArray = classes[i];
+
+				buffer.push(classArray.CSS_PREFIX || _getClassName(classArray.NAME.toLowerCase()));
+			}
+
+			boundingBoxNode.className = A.Array.dedupe(buffer).join(' ');
+
+			contentBox.addClass(getClassName('content'));
 		},
 
 		/**
@@ -294,7 +326,7 @@ A.extend(
 
 		/**
 		 * Applies the CSS classes to the <code>boundingBox</code> and
-         * <code>contentBox</code>.
+		 * <code>contentBox</code>.
 		 *
 		 * @method _uiSetCssClass
 		 * @protected
