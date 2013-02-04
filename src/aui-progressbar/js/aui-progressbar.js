@@ -51,7 +51,7 @@ var L = A.Lang,
 	CSS_TEXT = getCN(PROGRESS_BAR, TEXT),
 	CSS_VERTICAL = getCN(PROGRESS_BAR, VERTICAL),
 
-	TPL_STATUS = '<div class="'+CSS_STATUS+'"></div>',
+	TPL_STATUS = '<div class="'+CSS_STATUS+' stripes"></div>',
 	TPL_TEXT = '<div class="'+CSS_TEXT+'"></div>';
 
 /**
@@ -288,6 +288,16 @@ var ProgressBar = A.Component.create(
 
 				instance._renderStatusNode();
 				instance._renderTextNode();
+
+				var boundingBox = instance.get(BOUNDING_BOX);
+				var diameter = boundingBox.get('offsetHeight') || 25;
+				var radius = diameter/2 + "px";
+
+				boundingBox.all('div').setStyles({
+					MozBorderRadius: radius,
+					WebkitBorderRadius: radius,
+					borderRadius: radius
+				});
 			},
 
 			syncUI: function() {
