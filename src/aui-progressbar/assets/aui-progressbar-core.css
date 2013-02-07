@@ -1,6 +1,3 @@
-.aui-progress-bar {
-}
-
 .aui-progress-bar-content {
 	background: white;
 	border: 1px solid #949DAD;
@@ -8,12 +5,6 @@
 	overflow: hidden;
 	padding: 1px;
 	position: relative;
-}
-
-.aui-progress-bar-horizontal {
-}
-
-.aui-progress-bar-vertical {
 }
 
 .aui-progress-bar-content {
@@ -42,24 +33,22 @@
 	width: 100%;
 }
 
-/* ---- extras ---- */
+/* ---------- Extras ---------- */
 
 .aui-progress-bar-content {
-	background-image: -webkit-gradient(linear, #BABDBF, #C8CACD);
-	background-image: -webkit-linear-gradient(top, #BABDBF, #C8CACD);
 	background-image: -moz-linear-gradient(top, #BABDBF, #C8CACD);
-	background-image: -o-linear-gradient(top, #BABDBF, #C8CACD);
+	background-image: -webkit-linear-gradient(top, #BABDBF, #C8CACD);
 	background: linear-gradient(to bottom, #BABDBF, #C8CACD);
-	-moz-box-shadow: inset -1px 1px 1px rgba(66,66,66,0.4);
-	-webkit-box-shadow: inset -1px 1px 1px rgba(66,66,66,0.4);
-	box-shadow: inset -1px 1px 1px rgba(66,66,66,0.4);
+	-moz-box-shadow: inset -1px 1px 1px rgba(66, 66, 66, 0.4);
+	-webkit-box-shadow: inset -1px 1px 1px rgba(66, 66, 66, 0.4);
+	box-shadow: inset -1px 1px 1px rgba(66, 66, 66, 0.4);
 	padding: 0;
 }
 
 .aui-progress-bar-status {
-	-moz-box-shadow: 1px 1px 2px rgba(66,66,66,0.5);
-	-webkit-box-shadow: 1px 1px 2px rgba(66,66,66,0.5);
-	box-shadow: 1px 1px 2px rgba(66,66,66,0.5);
+	-moz-box-shadow: 1px 1px 2px rgba(66, 66, 66, 0.5);
+	-webkit-box-shadow: 1px 1px 2px rgba(66, 66, 66, 0.5);
+	box-shadow: 1px 1px 2px rgba(66, 66, 66, 0.5);
 }
 
 .aui-progress-bar-text {
@@ -67,83 +56,30 @@
 	z-index: 9999;
 }
 
-.stripes:before, .stripes:after {
-	content: "";
+.stripes:after, .stripes:before {
 	border-radius: inherit;
-	position: absolute;
 	bottom: 0;
+	content: "";
 	left: 0;
 	right: 0;
+	position: absolute;
 	top: 0;
 }
 
 .stripes:before {
-	background-image: -webkit-gradient(linear, transparent, #000);
-	background-image: -webkit-linear-gradient(top, transparent 25%, #000);
 	background-image: -moz-linear-gradient(top, transparent 25%, #000);
-	background-image: -o-linear-gradient(top, transparent 25%, #000);
+	background-image: -webkit-linear-gradient(top, transparent 25%, #000);
 	background: linear-gradient(to bottom, transparent 25%, #000);
 	opacity: 0.2;
 }
 
 .stripes:after {
-	background-image:
-		-webkit-gradient(linear, 0 0, 100% 100%,
-			color-stop(.25, rgba(255, 255, 255, .4)),
-			color-stop(.25, transparent),
-			color-stop(.5, transparent),
-			color-stop(.5, rgba(255, 255, 255, .4)),
-			color-stop(.75, rgba(255, 255, 255, .4)),
-			color-stop(.75, transparent),
-			to(transparent)
-		);
-	background-image:
-		-webkit-linear-gradient(
-			-45deg,
-			rgba(255, 255, 255, .4) 25%,
-			transparent 25%,
-			transparent 50%,
-			rgba(255, 255, 255, .4) 50%,
-			rgba(255, 255, 255, .4) 75%,
-			transparent 75%,
-			transparent
-		);
-	background-image:
-		-moz-linear-gradient(
-			-45deg,
-			rgba(255, 255, 255, .4) 25%,
-			transparent 25%,
-			transparent 50%,
-			rgba(255, 255, 255, .4) 50%,
-			rgba(255, 255, 255, .4) 75%,
-			transparent 75%,
-			transparent
-		);
-	background-image:
-		-o-linear-gradient(
-			-45deg,
-			rgba(255, 255, 255, .4) 25%,
-			transparent 25%,
-			transparent 50%,
-			rgba(255, 255, 255, .4) 50%,
-			rgba(255, 255, 255, .4) 75%,
-			transparent 75%,
-			transparent
-		);
-	background-image:
-		linear-gradient(
-			-45deg,
-			rgba(255, 255, 255, .4) 25%,
-			transparent 25%,
-			transparent 50%,
-			rgba(255, 255, 255, .4) 50%,
-			rgba(255, 255, 255, .4) 75%,
-			transparent 75%,
-			transparent
-		);
-	z-index: 1;
-	-webkit-background-size: 50px 50px;
+	background-image: -moz-linear-gradient(-45deg, rgba(255, 255, 255, 0.4) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.4) 75%, transparent 75%, transparent);
+	background-image: -webkit-linear-gradient(-45deg, rgba(255, 255, 255, 0.4) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.4) 75%, transparent 75%, transparent);
+	background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.4) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.4) 75%, transparent 75%, transparent);
 	-moz-background-size: 50px 50px;
+	-webkit-background-size: 50px 50px;
 	background-size: 50px 50px;
 	overflow: hidden;
+	z-index: 1;
 }
