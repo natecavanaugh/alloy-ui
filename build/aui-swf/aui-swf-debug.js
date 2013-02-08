@@ -25,7 +25,7 @@ YUI.AUI.SWF.eventHandler = function(id, event) {
 if (UA.gecko || UA.webkit || UA.opera) {
 	var flashMimeType = navigator.mimeTypes[ATTR_TYPE];
 
-	if (flashMimeType) {
+	if (flashMimeType && flashMimeType.enabledPlugin) {
 		var enabledPlugin = flashMimeType.enabledPlugin;
 
 		var versions = [];
