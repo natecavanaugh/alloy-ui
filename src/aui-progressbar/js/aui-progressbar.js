@@ -51,8 +51,8 @@ var L = A.Lang,
 	CSS_TEXT = getCN(PROGRESS_BAR, TEXT),
 	CSS_VERTICAL = getCN(PROGRESS_BAR, VERTICAL),
 
-	TPL_STATUS = '<div class="'+CSS_STATUS+'"></div>',
-	TPL_TEXT = '<div class="'+CSS_TEXT+'"></div>';
+	TPL_STATUS = '<div class="' + CSS_STATUS + ' stripes"></div>',
+	TPL_TEXT = '<div class="' + CSS_TEXT + '"></div>';
 
 /**
  * <p><img src="assets/images/aui-progressbar/main.png"/></p>
@@ -124,9 +124,9 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Display label of the progressbar. If not specified try to query
-             * using HTML_PARSER an element inside contentBox which matches
-             * <code>aui-progressbar-text</code> and get its innerHTML to be
-             * used as label.
+			 * using HTML_PARSER an element inside contentBox which matches
+			 * <code>aui-progressbar-text</code> and get its innerHTML to be
+			 * used as label.
 			 *
 			 * @attribute label
 			 * @default ''
@@ -138,8 +138,8 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Represents the top value for the bar. The bar will be fully
-             * extended when reaching this value. Values higher than this will
-             * be ignored.
+			 * extended when reaching this value. Values higher than this will
+			 * be ignored.
 			 *
 			 * @attribute max
 			 * @default 100
@@ -152,8 +152,8 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Represents the lowest value for the bar. The bar will be
-             * totally collapsed when reaching this value. Values lower than
-             * this will be ignored.
+			 * totally collapsed when reaching this value. Values lower than
+			 * this will be ignored.
 			 *
 			 * @attribute min
 			 * @default 0
@@ -166,7 +166,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Display orientation of the progressbar (i.e. vertical or
-             * horizontal).
+			 * horizontal).
 			 *
 			 * @attribute orientation
 			 * @default 'horizontal'
@@ -181,7 +181,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Calculate the ratio based on <code>max</code> and
-             * <code>min</code> values.
+			 * <code>min</code> values.
 			 *
 			 * @attribute ratio
 			 * @readOnly
@@ -193,22 +193,9 @@ var ProgressBar = A.Component.create(
 			},
 
 			/**
-			 * Calculate the progressbar step based on <code>ratio</code>
-             * value.
-			 *
-			 * @attribute step
-			 * @readOnly
-			 * @type number
-			 */
-			step: {
-				getter: '_getStep',
-				readOnly: true
-			},
-
-			/**
 			 * DOM Node to display the satus bar of the progressbar. If not
-             * specified try to query using HTML_PARSER an element inside
-             * contentBox which matches <code>aui-progressbar-status</code>.
+			 * specified try to query using HTML_PARSER an element inside
+			 * contentBox which matches <code>aui-progressbar-status</code>.
 			 *
 			 * @attribute statusNode
 			 * @default Generated div element.
@@ -221,9 +208,22 @@ var ProgressBar = A.Component.create(
 			},
 
 			/**
+			 * Calculate the progressbar step based on <code>ratio</code>
+			 * value.
+			 *
+			 * @attribute step
+			 * @readOnly
+			 * @type number
+			 */
+			step: {
+				getter: '_getStep',
+				readOnly: true
+			},
+
+			/**
 			 * DOM Node to display the text of the progressbar. If not
-             * specified try to query using HTML_PARSER an element inside
-             * contentBox which matches <code>aui-progressbar-text</code>.
+			 * specified try to query using HTML_PARSER an element inside
+			 * contentBox which matches <code>aui-progressbar-text</code>.
 			 *
 			 * @attribute textNode
 			 * @default Generated div element.
@@ -237,7 +237,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * The value for the bar. Valid values are in between the minValue
-             * and maxValue attributes.
+			 * and maxValue attributes.
 			 *
 			 * @attribute value
 			 * @default 0
@@ -262,16 +262,16 @@ var ProgressBar = A.Component.create(
 		 */
 		HTML_PARSER: {
 			label: function(contentBox) {
-				var textNode = contentBox.one(DOT+CSS_TEXT);
+				var textNode = contentBox.one(DOT + CSS_TEXT);
 
 				if (textNode) {
 					return textNode.html();
 				}
 			},
 
-			statusNode: DOT+CSS_STATUS,
+			statusNode: DOT + CSS_STATUS,
 
-			textNode: DOT+CSS_TEXT
+			textNode: DOT + CSS_TEXT
 		},
 
 		UI_ATTRS: [LABEL, ORIENTATION, VALUE],
@@ -294,23 +294,26 @@ var ProgressBar = A.Component.create(
 				var instance = this;
 
 				if (instance.get(USE_ARIA)) {
-					instance.plug(A.Plugin.Aria, {
-						attributes: {
-							value: 'valuenow',
-							max: 'valuemax',
-							min: 'valuemin',
-							orientation: 'orientation',
-							label: 'label'
+					instance.plug(
+						A.Plugin.Aria,
+						{
+							attributes: {
+								label: 'label',
+								max: 'valuemax',
+								min: 'valuemin',
+								orientation: 'orientation',
+								value: 'valuenow'
+							}
 						}
-					});
+					);
 				}
 			},
 
 			/**
 			 * Calculate the contentBox size based on the
-             * <code>orientation</code> of the progressbar. If the orientation
-             * is HORIZONTAL get the width, if the orientation is VERTICAL get
-             * the height.
+			 * <code>orientation</code> of the progressbar. If the orientation
+			 * is HORIZONTAL get the width, if the orientation is VERTICAL get
+			 * the height.
 			 *
 			 * @method _getContentBoxSize
 			 * @protected
@@ -318,11 +321,10 @@ var ProgressBar = A.Component.create(
 			 */
 			_getContentBoxSize: function() {
 				var instance = this;
-				var contentBox = instance.get(CONTENT_BOX);
 
 				return toNumber(
-					contentBox.getStyle(
-						this.get(ORIENTATION) === HORIZONTAL ? WIDTH : HEIGHT
+					instance.get(CONTENT_BOX).getStyle(
+						instance.get(ORIENTATION) === HORIZONTAL ? WIDTH : HEIGHT
 					)
 				);
 			},
@@ -342,7 +344,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Calculate the ratio based on <code>max</code> and
-             * <code>min</code> values.
+			 * <code>min</code> values.
 			 *
 			 * @method _getRatio
 			 * @protected
@@ -350,6 +352,7 @@ var ProgressBar = A.Component.create(
 			 */
 			_getRatio: function() {
 				var instance = this;
+
 				var min = instance.get(MIN);
 				var ratio = (instance.get(VALUE) - min) / (instance.get(MAX) - min);
 
@@ -358,7 +361,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Calculate the progressbar step based on <code>ratio</code>
-             * value.
+			 * value.
 			 *
 			 * @method _getStep
 			 * @protected
@@ -398,7 +401,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Invoked automatically by the UI_ATTRS Widget API when bind or sync the
-             * <code>label</code> attribute.
+			 * <code>label</code> attribute.
 			 *
 			 * @method _uiSetLabel
 			 * @param {String} val Display label
@@ -410,7 +413,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Invoked automatically by the UI_ATTRS Widget API when bind or sync the
-             * <code>orientation</code> attribute.
+			 * <code>orientation</code> attribute.
 			 *
 			 * @method _uiSetOrientation
 			 * @param {String} val Orientation
@@ -418,6 +421,7 @@ var ProgressBar = A.Component.create(
 			 */
 			_uiSetOrientation: function(val) {
 				var instance = this;
+
 				var boundingBox = instance.get(BOUNDING_BOX);
 				var horizontal = (val === HORIZONTAL);
 
@@ -429,7 +433,7 @@ var ProgressBar = A.Component.create(
 
 			/**
 			 * Invoked automatically by the UI_ATTRS Widget API when bind or sync the
-             * <code>value</code> attribute.
+			 * <code>value</code> attribute.
 			 *
 			 * @method _uiSetValue
 			 * @param {String} val Progress value
@@ -437,7 +441,7 @@ var ProgressBar = A.Component.create(
 			 */
 			_uiSetValue: function(val) {
 				var instance = this;
-				var statusNode = instance.get(STATUS_NODE);
+
 				var pixelStep = instance._getPixelStep();
 
 				var styles = {};
@@ -446,13 +450,13 @@ var ProgressBar = A.Component.create(
 					styles = {
 						height: '100%',
 						top: AUTO,
-						width: pixelStep+PX
+						width: pixelStep + PX
 					};
 				}
 				else {
-					 styles = {
-						height: pixelStep+PX,
-						top: toNumber(instance._getContentBoxSize() - pixelStep)+PX,
+					styles = {
+						height: pixelStep + PX,
+						top: toNumber(instance._getContentBoxSize() - pixelStep) + PX,
 						width: '100%'
 					};
 				}
@@ -461,7 +465,7 @@ var ProgressBar = A.Component.create(
 					instance.fire(COMPLETE);
 				}
 
-				statusNode.setStyles(styles);
+				instance.get(STATUS_NODE).setStyles(styles);
 			},
 
 			/**
@@ -472,10 +476,10 @@ var ProgressBar = A.Component.create(
 			 */
 			_uiSizeTextNode: function() {
 				var instance = this;
-				var contentBox = instance.get(CONTENT_BOX);
-				var textNode = instance.get(TEXT_NODE);
 
-				textNode.setStyle(
+				var contentBox = instance.get(CONTENT_BOX);
+
+				instance.get(TEXT_NODE).setStyle(
 					LINE_HEIGHT,
 					contentBox.getStyle(HEIGHT)
 				);
