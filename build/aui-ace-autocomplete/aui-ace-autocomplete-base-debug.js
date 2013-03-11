@@ -33,22 +33,42 @@ Base.prototype = {
 		if (processor && !processor.get(HOST)) {
 			processor.set(HOST, instance);
 		}
+
+		instance._onResultsErrorFn = A.bind(instance._onResultsError, instance);
+		instance._onResultsSuccessFn = A.bind(instance._onResultsSuccess, instance);
 	},
 
 	_addSuggestion: function(content) {
 		var instance = this;
+
+		instance._lockEditor = true;
 
 		var editor = instance._getEditor();
 
 		var data = instance.get(PROCESSOR).getSuggestion(instance._matchParams.match, content);
 
 		if (this.get(FILL_MODE) === Base.FILL_MODE_OVERWRITE) {
-			editor.removeWordLeft();
+			var matchParams = instance._matchParams;
+
+			var startRow = matchParams.row;
+
+			var startColumn = matchParams.column - matchParams.match.content.length;
+
+			var cursorPosition = editor.getCursorPosition();
+
+			var Range = require('ace/range').Range;
+
+			var overwriteRange = new Range(startRow, startColumn, cursorPosition.row, cursorPosition.column);
+
+			editor.getSession().replace(overwriteRange, data);
+		}
+		else {
+			editor.insert(data);
 		}
 
-		editor.insert(data);
-
 		editor.focus();
+
+		instance._lockEditor = false;
 
 		instance.fire('addSuggestion', data);
 
@@ -67,7 +87,9 @@ Base.prototype = {
 
 		var editor = instance._getEditor();
 
-		editor.on('change',	A.bind(instance._onEditorChange, instance));
+		instance._onChangeFn = A.bind(instance._onEditorChange, instance);
+
+		editor.on('change',	instance._onChangeFn);
 
 		editor.commands.addCommand(
 			{
@@ -126,6 +148,8 @@ Base.prototype = {
 
 		editor.commands.removeCommand('showAutoComplete');
 
+		editor.removeListener('change', instance._onChangeFn);
+
 		editor.getSelection().removeListener('changeCursor', instance._onEditorChangeCursorFn);
 
 		instance._removeAutoCompleteCommands();
@@ -154,7 +178,7 @@ Base.prototype = {
 
 		var dataAction = data.action;
 
-		if (dataAction === INSERT_TEXT || dataAction === 'removeText') {
+		if (!instance._lockEditor && (dataAction === INSERT_TEXT || dataAction === 'removeText')) {
 			var dataRange = data.range;
 
 			var column = dataRange.start.column;
@@ -244,7 +268,7 @@ Base.prototype = {
 				row: row
 			};
 
-			processor.getResults(match, A.bind(instance._onResultsSuccess, instance), A.bind(instance._onResultsError, instance));
+			processor.getResults(match, instance._onResultsSuccessFn, instance._onResultsErrorFn);
 		}
 
 		instance.fire(

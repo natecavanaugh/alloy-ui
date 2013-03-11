@@ -33,22 +33,42 @@ Base.prototype = {
 		if (processor && !processor.get(HOST)) {
 			processor.set(HOST, instance);
 		}
+
+		instance._onResultsErrorFn = A.bind(instance._onResultsError, instance);
+		instance._onResultsSuccessFn = A.bind(instance._onResultsSuccess, instance);
 	},
 
 	_addSuggestion: function(content) {
 		var instance = this;
+
+		instance._lockEditor = true;
 
 		var editor = instance._getEditor();
 
 		var data = instance.get(PROCESSOR).getSuggestion(instance._matchParams.match, content);
 
 		if (this.get(FILL_MODE) === Base.FILL_MODE_OVERWRITE) {
-			editor.removeWordLeft();
+			var matchParams = instance._matchParams;
+
+			var startRow = matchParams.row;
+
+			var startColumn = matchParams.column - matchParams.match.content.length;
+
+			var cursorPosition = editor.getCursorPosition();
+
+			var Range = require('ace/range').Range;
+
+			var overwriteRange = new Range(startRow, startColumn, cursorPosition.row, cursorPosition.column);
+
+			editor.getSession().replace(overwriteRange, data);
+		}
+		else {
+			editor.insert(data);
 		}
 
-		editor.insert(data);
-
 		editor.focus();
+
+		instance._lockEditor = false;
 
 		instance.fire('addSuggestion', data);
 
@@ -67,7 +87,9 @@ Base.prototype = {
 
 		var editor = instance._getEditor();
 
-		editor.on('change',	A.bind(instance._onEditorChange, instance));
+		instance._onChangeFn = A.bind(instance._onEditorChange, instance);
+
+		editor.on('change',	instance._onChangeFn);
 
 		editor.commands.addCommand(
 			{
@@ -126,6 +148,8 @@ Base.prototype = {
 
 		editor.commands.removeCommand('showAutoComplete');
 
+		editor.removeListener('change', instance._onChangeFn);
+
 		editor.getSelection().removeListener('changeCursor', instance._onEditorChangeCursorFn);
 
 		instance._removeAutoCompleteCommands();
@@ -154,7 +178,7 @@ Base.prototype = {
 
 		var dataAction = data.action;
 
-		if (dataAction === INSERT_TEXT || dataAction === 'removeText') {
+		if (!instance._lockEditor && (dataAction === INSERT_TEXT || dataAction === 'removeText')) {
 			var dataRange = data.range;
 
 			var column = dataRange.start.column;
@@ -244,7 +268,7 @@ Base.prototype = {
 				row: row
 			};
 
-			processor.getResults(match, A.bind(instance._onResultsSuccess, instance), A.bind(instance._onResultsError, instance));
+			processor.getResults(match, instance._onResultsSuccessFn, instance._onResultsErrorFn);
 		}
 
 		instance.fire(
@@ -792,7 +816,7 @@ var AutoCompleteList = A.Component.create({
 A.AceEditor.AutoCompleteList = AutoCompleteList;
 A.AceEditor.AutoComplete = AutoCompleteList;
 
-}, '@VERSION@' ,{skinnable:true, requires:['aui-overlay-base','widget-autohide','aui-ace-autocomplete-base']});
+}, '@VERSION@' ,{requires:['aui-overlay-base','widget-autohide','aui-ace-autocomplete-base'], skinnable:true});
 AUI.add('aui-ace-autocomplete-plugin', function(A) {
 var Plugin = A.Plugin;
 
@@ -820,39 +844,39 @@ var Lang = A.Lang,
 	AObject = A.Object,
 
 	DIRECTIVES = [
-		'flush',
-		'recover',
-		'fallback',
-		'local',
+		'assign',
+		'attempt',
 		'break',
-		'lt',
 		'case',
+		'compress',
+		'default',
+		'else',
+		'elseif',
+		'escape',
+		'fallback',
+		'flush',
+		'ftl',
+		'function',
 		'global',
 		'if',
-		'compress',
-		'escape',
-		'assign',
-		'elseif',
-		'noescape',
-		'setting',
-		'list',
-		'else',
-		'switch',
-		'include',
-		'recurse',
-		'rt',
-		'ftl',
-		'macro',
-		'stop',
-		'nt',
-		'visit',
-		'attempt',
-		'nested',
 		'import',
-		'default',
+		'include',
+		'list',
+		'local',
+		'lt',
+		'macro',
+		'nested',
+		'noescape',
+		'nt',
+		'recover',
+		'recurse',
 		'return',
+		'rt',
+		'setting',
+		'stop',
+		'switch',
 		't',
-		'function'
+		'visit'
 	],
 
 	Base = A.AceEditor.AutoCompleteBase,
@@ -892,12 +916,6 @@ var Freemarker = A.Component.create({
 	EXTENDS: A.Base,
 
 	prototype: {
-		initializer: function(config) {
-			var instance = this;
-
-			instance._tstree = new A.TernarySearchTree();
-		},
-
 		getMatch: function(content) {
 			var instance = this;
 
@@ -934,21 +952,23 @@ var Freemarker = A.Component.create({
 		getResults: function(match, callbackSuccess, callbackError) {
 			var instance = this;
 
-			var tstree = instance._tstree;
-
 			var type = match.type;
 
 			if (type === MATCH_DIRECTIVES) {
 				var matchDirectives = DIRECTIVES;
 
-				var content = match.content;
+				var content = match.content.toLowerCase();
 
 				if (content.length) {
-					if (instance._lastTSTLoad !== MATCH_DIRECTIVES) {
-						instance._addDirectives();
-					}
-
-					matchDirectives = tstree.prefixSearch(content, true);
+					matchDirectives = AArray.filter(
+						matchDirectives,
+						function(item, index) {
+							return (item.indexOf(content) === 0);
+						}
+					);
+				}
+				else {
+					matchDirectives = matchDirectives.sort();
 				}
 
 				callbackSuccess(matchDirectives);
@@ -968,50 +988,38 @@ var Freemarker = A.Component.create({
 			if (selectedSuggestion) {
 				var fillMode = instance.get('host').get('fillMode');
 
-				if (fillMode === Base.FILL_MODE_INSERT) {
-					var type = match.type;
+				var type = match.type;
 
+				var variables;
+
+				var lastEntry;
+
+				if (fillMode === Base.FILL_MODE_INSERT) {
 					if (type === MATCH_DIRECTIVES) {
 						if (match.content && selectedSuggestion.indexOf(match.content) === 0) {
 							result = selectedSuggestion.substring(match.content.length);
 						}
 					}
 					else if (type === MATCH_VARIABLES) {
-						var variables = match.content.split(DOT);
+						variables = match.content.split(DOT);
 
-						var lastEntry = variables[variables.length - 1];
+						lastEntry = variables[variables.length - 1];
 
 						if (lastEntry && selectedSuggestion.indexOf(lastEntry) === 0) {
 							result = selectedSuggestion.substring(lastEntry.length);
 						}
 					}
 				}
+				else if (type === MATCH_VARIABLES) {
+					variables = match.content.split(DOT);
+
+					variables[variables.length - 1] = selectedSuggestion;
+
+					result = variables.join(DOT);
+				}
 			}
 
 			return result;
-		},
-
-		_addData: function(data) {
-			var instance = this;
-
-			var tstree = instance._tstree;
-
-			tstree.empty();
-
-			AArray.each(
-				data,
-				function(item, index) {
-					tstree.add(item);
-				}
-			);
-		},
-
-		_addDirectives: function() {
-			var instance = this;
-
-			instance._addData(DIRECTIVES);
-
-			instance._lastTSTLoad = MATCH_DIRECTIVES;
 		},
 
 		_getVariableMatches: function(content) {
@@ -1039,33 +1047,25 @@ var Freemarker = A.Component.create({
 
 			var matches = [];
 
+			lastEntry = lastEntry.toLowerCase();
+
 			if (Lang.isObject(variableCache)) {
 				AArray.each(
 					AObject.keys(variableCache),
 					function(item, index) {
-						matches.push(item);
+						if (lastEntry) {
+							if (item.toLowerCase().indexOf(lastEntry) === 0) {
+								matches.push(item);
+							}
+						}
+						else {
+							matches.push(item);
+						}
 					}
 				);
-
-				if (lastEntry) {
-					var tstree = instance._tstree;
-
-					tstree.empty();
-
-					AArray.each(
-						matches,
-						function(item, index) {
-							tstree.add(item);
-						}
-					);
-
-					matches = tstree.prefixSearch(lastEntry, true);
-
-					instance._lastTSTLoad = MATCH_VARIABLES;
-				}
 			}
 
-			return matches;
+			return matches.sort();
 		}
 	}
 });
