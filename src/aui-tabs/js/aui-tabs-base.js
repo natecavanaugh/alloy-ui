@@ -23,7 +23,7 @@ var Lang = A.Lang,
 	TPL_DIV = '<div></div>',
 	TPL_UL = '<ul></ul>',
 
-	TPL_LABEL = '<em></em>',
+	TPL_LABEL = '<span></span>',
 	TPL_TAB_CONTAINER = TPL_UL,
 	TPL_CONTENT_ITEM = TPL_DIV,
 	TPL_CONTENT_CONTAINER = TPL_DIV;
@@ -545,16 +545,22 @@ var TabView = A.Component.create(
 			_onActiveTabChange: function(event) {
 				var instance = this;
 
-				var oldTab = event.prevVal;
-				var newTab = event.newVal;
+				var targetTab = event.newVal;
+				var previousTab = event.prevVal;
 
-				if (newTab) {
-					newTab.set('active', true);
-				}
+				if (targetTab != previousTab) {
+					targetTab.set('active', true);
 
-				if (newTab != oldTab) {
-					if (oldTab) {
-						oldTab.set('active', false);
+					var targetTabLabel = targetTab.get(CONTENT_BOX).one('.' + CSS_TAB_LABEL);
+
+					targetTabLabel.html('<strong>' + targetTabLabel.text() + '</strong>');
+
+					if (previousTab) {
+						var previousTabLabel = previousTab.get(CONTENT_BOX).one('.' + CSS_TAB_LABEL);
+
+						previousTabLabel.html(previousTabLabel.text());
+
+						previousTab.set('active', false);
 					}
 				}
 			},
@@ -599,7 +605,7 @@ var TabView = A.Component.create(
 
 				var length = items.length;
 
-				for (var i = 0; i < items.length; i++) {
+				for (var i = 0; i < length; i++) {
 					instance.addTab(items[i]);
 				}
 
