@@ -40,8 +40,9 @@ var Lang = A.Lang,
 	CSS_CLEARFIX = getClassName('helper', 'clearfix'),
 
 	CSS_ICON = getClassName('icon'),
-	CSS_ICON_CLOSE = getClassName('icon', 'close'),
+	CSS_ICON_CLOSE = getClassName('icon', 'remove', 'sign'),
 	CSS_ICON_CLOSE_HOVER = getClassName(ENTRY_NAME, 'close', 'hover'),
+	CSS_ICON_CLOSE_FOCUS = getClassName('icon', 'white'),
 	CSS_ENTRY_CLOSE = getClassName(ENTRY_NAME, 'close'),
 	CSS_ENTRY_HOLDER = getClassName(ENTRY_NAME, 'holder'),
 	CSS_ENTRY_TEXT = getClassName(ENTRY_NAME, 'text'),
@@ -54,7 +55,7 @@ var Lang = A.Lang,
 	LEFT = 'LEFT',
 	RIGHT = 'RIGHT',
 
-	TPL_ENTRY_CLOSE = '<span class="' + [CSS_ICON, CSS_ICON_CLOSE, CSS_ENTRY_CLOSE].join(' ') + '"></span>',
+	TPL_ENTRY_CLOSE = '<i class="' + [CSS_ICON_CLOSE, CSS_ENTRY_CLOSE].join(' ') + '"></i>',
 	TPL_ENTRY_TEXT = '<span class="' + CSS_ENTRY_TEXT + '"></span>',
 	TPL_ENTRY_HOLDER = '<ul class="' + [CSS_CLEARFIX, CSS_ENTRY_HOLDER].join(' ') + '"></ul>',
 
@@ -168,6 +169,14 @@ var TextboxList = A.Component.create(
 				var entries = instance.entries;
 				var entryHolder = instance.entryHolder;
 				var closeSelector = '.' + CSS_ICON_CLOSE;
+				var entrySelector = '.' + ENTRY_NAME;
+
+				var iconToggle = function(event) {
+					var instance = event.target;
+
+					var icon = instance.one(closeSelector);
+					icon.toggleClass(CSS_ICON_CLOSE_FOCUS);
+				}
 
 				entries.after('add', instance._updateEntryHolder, instance);
 				entries.after('replace', instance._updateEntryHolder, instance);
@@ -176,6 +185,8 @@ var TextboxList = A.Component.create(
 				entryHolder.delegate('click', A.bind(instance._removeItem, instance), closeSelector);
 				entryHolder.delegate('mouseenter', A.bind(instance._onCloseIconMouseOver, instance), closeSelector);
 				entryHolder.delegate('mouseleave', A.bind(instance._onCloseIconMouseOut, instance), closeSelector);
+				entryHolder.delegate('focus', iconToggle, entrySelector);
+				entryHolder.delegate('blur', iconToggle, entrySelector);
 
 				A.on(
 					'key',
