@@ -41,8 +41,7 @@ var Lang = A.Lang,
 
 	CSS_ICON = getClassName('icon'),
 	CSS_ICON_CLOSE = getClassName('icon', 'remove', 'sign'),
-	CSS_ICON_CLOSE_HOVER = getClassName(ENTRY_NAME, 'close', 'hover'),
-	CSS_ICON_CLOSE_FOCUS = getClassName('icon', 'white'),
+	CSS_ICON_CLOSE_HOVER = getClassName('icon', 'white'),
 	CSS_ENTRY_CLOSE = getClassName(ENTRY_NAME, 'close'),
 	CSS_ENTRY_HOLDER = getClassName(ENTRY_NAME, 'holder'),
 	CSS_ENTRY_TEXT = getClassName(ENTRY_NAME, 'text'),
@@ -171,13 +170,6 @@ var TextboxList = A.Component.create(
 				var closeSelector = '.' + CSS_ICON_CLOSE;
 				var entrySelector = '.' + ENTRY_NAME;
 
-				var iconToggle = function(event) {
-					var instance = event.target;
-
-					var icon = instance.one(closeSelector);
-					icon.toggleClass(CSS_ICON_CLOSE_FOCUS);
-				}
-
 				entries.after('add', instance._updateEntryHolder, instance);
 				entries.after('replace', instance._updateEntryHolder, instance);
 				entries.after('remove', instance._updateEntryHolder, instance);
@@ -185,8 +177,8 @@ var TextboxList = A.Component.create(
 				entryHolder.delegate('click', A.bind(instance._removeItem, instance), closeSelector);
 				entryHolder.delegate('mouseenter', A.bind(instance._onCloseIconMouseOver, instance), closeSelector);
 				entryHolder.delegate('mouseleave', A.bind(instance._onCloseIconMouseOut, instance), closeSelector);
-				entryHolder.delegate('focus', iconToggle, entrySelector);
-				entryHolder.delegate('blur', iconToggle, entrySelector);
+				entryHolder.delegate('focus', A.bind(instance._onTBLFocus, instance), entrySelector);
+				entryHolder.delegate('blur', A.bind(instance._onTBLBlur, instance), entrySelector);
 
 				A.on(
 					'key',
@@ -247,6 +239,15 @@ var TextboxList = A.Component.create(
 				}
 			},
 
+			_isTBLFocused: function(textboxlistNode) {
+				if (textboxlistNode.hasClass(ENTRY_NAME + '-focused')) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			},
+
 			_onBoundingBoxClick: function(event) {
 				var instance = this;
 
@@ -255,20 +256,60 @@ var TextboxList = A.Component.create(
 
 			_onCloseIconMouseOut: function(event) {
 				var instance = this;
+				var target = event.currentTarget;
 
-				event.currentTarget.removeClass(CSS_ICON_CLOSE_HOVER);
+				var textboxlistEntryNode = target.ancestor('.' + ENTRY_NAME);
+
+				if (textboxlistEntryNode) {
+					if (!instance._isTBLFocused(textboxlistEntryNode)) {
+						target.removeClass(CSS_ICON_CLOSE_HOVER);
+					}
+				}
+				else {
+					target.removeClass(CSS_ICON_CLOSE_HOVER);
+				}
 			},
 
 			_onCloseIconMouseOver: function(event) {
 				var instance = this;
+				var target = event.currentTarget;
 
-				event.currentTarget.addClass(CSS_ICON_CLOSE_HOVER);
+				var textboxlistEntryNode = target.ancestor('.' + ENTRY_NAME);
+
+				if (textboxlistEntryNode) {
+					if (!instance._isTBLFocused(textboxlistEntryNode)) {
+						target.addClass(CSS_ICON_CLOSE_HOVER);
+					}
+				}
+				else {
+					target.addClass(CSS_ICON_CLOSE_HOVER);
+				}
 			},
 
 			_onInputNodeFocus: function(event) {
 				var instance = this;
 
 				instance._lastSelectedEntry = -1;
+			},
+
+			_onTBLBlur: function(event) {
+				var instance = this;
+
+				var icon = event.currentTarget.one('.' + CSS_ICON_CLOSE);
+
+				if (icon) {
+					icon.removeClass(CSS_ICON_CLOSE_HOVER);
+				}
+			},
+
+			_onTBLFocus: function(event) {
+				var instance = this;
+
+				var icon = event.currentTarget.one('.' + CSS_ICON_CLOSE);
+
+				if (icon) {
+					icon.addClass(CSS_ICON_CLOSE_HOVER);
+				}
 			},
 
 			_onTBLKeypress: function(event) {
