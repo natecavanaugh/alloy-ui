@@ -12,7 +12,7 @@
 
 .textboxlist .textboxlist-content .textboxlistentry-holder {
 	list-style: none;
-	margin-left: 0;
+	margin: 0;
 }
 
 .textboxlistentry-holder li {
@@ -48,8 +48,4 @@
 
 .textboxlistentry-focused .textboxlistentry-close-hover {
 	background-color: #457ce9;
-}
-
-.textboxlistentry-holder .textboxlist-input-container .lfr-tag-selector-input{
-	margin-bottom: 0;
 }

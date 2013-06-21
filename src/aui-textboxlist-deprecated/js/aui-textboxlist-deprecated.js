@@ -174,11 +174,11 @@ var TextboxList = A.Component.create(
 				entries.after('replace', instance._updateEntryHolder, instance);
 				entries.after('remove', instance._updateEntryHolder, instance);
 
+				entryHolder.delegate('blur', A.bind(instance._onTBLBlur, instance), entrySelector);
 				entryHolder.delegate('click', A.bind(instance._removeItem, instance), closeSelector);
+				entryHolder.delegate('focus', A.bind(instance._onTBLFocus, instance), entrySelector);
 				entryHolder.delegate('mouseenter', A.bind(instance._onCloseIconMouseOver, instance), closeSelector);
 				entryHolder.delegate('mouseleave', A.bind(instance._onCloseIconMouseOut, instance), closeSelector);
-				entryHolder.delegate('focus', A.bind(instance._onTBLFocus, instance), entrySelector);
-				entryHolder.delegate('blur', A.bind(instance._onTBLBlur, instance), entrySelector);
 
 				A.on(
 					'key',
@@ -256,34 +256,14 @@ var TextboxList = A.Component.create(
 
 			_onCloseIconMouseOut: function(event) {
 				var instance = this;
-				var target = event.currentTarget;
 
-				var textboxlistEntryNode = target.ancestor('.' + ENTRY_NAME);
-
-				if (textboxlistEntryNode) {
-					if (!instance._isTBLFocused(textboxlistEntryNode)) {
-						target.removeClass(CSS_ICON_CLOSE_HOVER);
-					}
-				}
-				else {
-					target.removeClass(CSS_ICON_CLOSE_HOVER);
-				}
+				event.currentTarget.removeClass(CSS_ICON_CLOSE_HOVER);
 			},
 
 			_onCloseIconMouseOver: function(event) {
 				var instance = this;
-				var target = event.currentTarget;
 
-				var textboxlistEntryNode = target.ancestor('.' + ENTRY_NAME);
-
-				if (textboxlistEntryNode) {
-					if (!instance._isTBLFocused(textboxlistEntryNode)) {
-						target.addClass(CSS_ICON_CLOSE_HOVER);
-					}
-				}
-				else {
-					target.addClass(CSS_ICON_CLOSE_HOVER);
-				}
+				event.currentTarget.addClass(CSS_ICON_CLOSE_HOVER);
 			},
 
 			_onInputNodeFocus: function(event) {
