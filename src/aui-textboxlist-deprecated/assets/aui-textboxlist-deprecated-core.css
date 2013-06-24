@@ -10,7 +10,7 @@
 	padding: 3px 0 2px;
 }
 
-.textboxlistentry-holder {
+.textboxlist .textboxlist-content .textboxlistentry-holder {
 	list-style: none;
 	margin: 0;
 }
@@ -39,13 +39,13 @@
 	cursor: pointer;
 	position: absolute;
 	right: 3px;
-	top: 3px;
+	top: 5px;
 }
 
 .textboxlistentry-close-hover {
 	background-color: #cad8f3;
 }
 
-.textboxlistentry-focused .textboxlistentry-close {
-	background-color: #fff;
+.textboxlistentry-focused .textboxlistentry-close-hover {
+	background-color: #457ce9;
 }
