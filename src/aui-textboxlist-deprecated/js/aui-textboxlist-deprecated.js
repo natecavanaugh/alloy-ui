@@ -239,15 +239,6 @@ var TextboxList = A.Component.create(
 				}
 			},
 
-			_isTBLFocused: function(textboxlistNode) {
-				if (textboxlistNode.hasClass(ENTRY_NAME + '-focused')) {
-					return true;
-				}
-				else {
-					return false;
-				}
-			},
-
 			_onBoundingBoxClick: function(event) {
 				var instance = this;
 
