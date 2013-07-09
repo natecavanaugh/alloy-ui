@@ -70,3 +70,7 @@
 .aui-tab-active .aui-tab-label:hover {
 	text-shadow: #222 -1px -1px 0px;
 }
+
+.aui-tab-active .aui-tab-label strong {
+	font-weight: normal;
+}
