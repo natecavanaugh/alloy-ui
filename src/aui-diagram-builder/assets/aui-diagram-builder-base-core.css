@@ -41,6 +41,11 @@
 	width: 270px;
 }
 
+.tab-pane {
+	height: 544px;
+	overflow: auto;
+}
+
 .diagram-builder-canvas {
 	position: relative;
 }
@@ -71,7 +76,7 @@
 }
 
 .diagram-builder-drop-container {
-    height: 600px;
+	height: 600px;
 }
 
 .diagram-builder-anchor-node {
