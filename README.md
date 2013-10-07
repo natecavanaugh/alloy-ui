@@ -12,6 +12,8 @@ AlloyUI is a framework built on top of [YUI3](http://yuilibrary.com) (JavaScript
 * [Contributing](http://alloyui.com/contributing/)
 * [About](http://alloyui.com/about/)
 
+## Adding new feature
+
 ## Automated tasks
 
 Provides a set of util tasks to work with [AlloyUI](http://github.com/liferay/alloy-ui) project.
@@ -20,7 +22,7 @@ Provides a set of util tasks to work with [AlloyUI](http://github.com/liferay/al
 
 ### Setup
 
-1. Install [NodeJS](https://github.com/bevry/community/wiki/Installing-Node), if you don't have it yet. 
+1. Install [NodeJS](https://github.com/bevry/community/wiki/Installing-Node), if you don't have it yet.
 
 	Some tasks requires you to have [Ruby](http://www.ruby-lang.org/en/downloads/), [Sass](http://sass-lang.com/tutorial.html), and [Compass](http://compass-style.org/install/) installed. If you're on OS X or Linux you probably already have Ruby installed; test with `ruby -v` in your terminal. When you've confirmed you have Ruby installed, run `gem update --system && gem install compass` to install Compass and Sass.
 
