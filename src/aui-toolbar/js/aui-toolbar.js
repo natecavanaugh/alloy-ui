@@ -202,7 +202,7 @@ A.Toolbar = A.Component.create({
          */
         item: function(index) {
             var instance = this,
-                seed = instance.get(BOUNDING_BOX).get(CHILDREN).item(index),
+                seed = instance.get(BOUNDING_BOX).get(CHILDREN).one(index),
                 widget;
 
             instance._initEnclosingWidgetIfNeeded(seed);
