@@ -13,6 +13,7 @@ var Lang = A.Lang,
 
 	BOUNDING_BOX = 'boundingBox',
 	CONTENT_BOX = 'contentBox',
+	ESCAPED_CONTENT = 'escapedContent',
 
 	CONFIG_ANIM = {
 		from: {
@@ -101,6 +102,9 @@ var TextboxList = A.Component.create(
 			},
 			delimChar: {
 				value: ''
+			},
+			escapedContent: {
+				value: false
 			},
 			tabIndex: {
 				value: 0
@@ -430,6 +434,7 @@ var TextboxList = A.Component.create(
 				var eventType = event.type;
 				var inputNode = instance.inputNode;
 				var entryHolder = instance.entryHolder;
+				var escaped = instance.get(ESCAPED_CONTENT);
 				var item = event.item;
 				var index = event.index;
 
@@ -441,6 +446,7 @@ var TextboxList = A.Component.create(
 					if (eventType == 'dataset:add') {
 						var entry = new TextboxListEntry(
 							{
+								escapedContent: escaped,
 								labelText: key
 							}
 						);
@@ -489,6 +495,9 @@ var TextboxListEntry = A.Component.create(
 		NAME: ENTRY_NAME,
 
 		ATTRS: {
+			escapedContent: {
+				value: false
+			},
 			labelText: {
 				value: ''
 			},
@@ -504,13 +513,15 @@ var TextboxListEntry = A.Component.create(
 				var instance = this;
 
 				var contentBox = instance.get(CONTENT_BOX);
+				var escapedContent = instance.get(ESCAPED_CONTENT);
+				var labelText = instance.get('labelText');
 
 				var text = A.Node.create(TPL_ENTRY_TEXT);
 				var close = A.Node.create(TPL_ENTRY_REMOVE);
 
-				var labelText = A.Escape.html(instance.get('labelText'));
+				var labelTextVal = escapedContent ? A.Escape.html(labelText) : labelText;
 
-				text.set('innerHTML', labelText);
+				text.set('innerHTML', labelTextVal);
 
 				contentBox.appendChild(text);
 				contentBox.appendChild(close);
