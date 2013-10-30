@@ -1,13 +1,12 @@
-.autocomplete-content {
+.autocomplete-content .toolbar {
+	display: inline-block;
+	position: absolute;
 }
 
 .autocomplete-trigger {
 	cursor: pointer;
 	display: inline-block;
 	float: none;
-}
-
-.autocomplete-results {	
 }
 
 .autocomplete-list-item {
