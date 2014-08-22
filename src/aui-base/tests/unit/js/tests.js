@@ -9,6 +9,30 @@ YUI.add('aui-base-tests', function(Y) {
             'Lorem-Ipsum-doLOR. sit-amet +1',
             'lorem-ipsum-dolor-sit-amet, LOREM-ipsum-D&OLOR',
             'Lorem-ipsum-dolor-sit-amet. lorem-ipsum-dolor-sit-amet, lorem-Ipsum-Dolor-Sit-Amet',
+        ],
+        prefixStrings = [
+            'sword',
+            'word',
+            'gold',
+            'black',
+            'john ',
+            'smith'
+        ],
+        prefixLessStrings = [
+            'smith',
+            'smith',
+            'smith',
+            'blacksmith',
+            'smith ',
+            'ereens'
+        ],
+        prefixedStrings = [
+            'swordsmith',
+            'wordsmith',
+            'goldsmith',
+            'blacksmith',
+            'john smith ',
+            'smithereens'
         ];
 
     var Assert = Y.Assert,
@@ -106,6 +130,15 @@ YUI.add('aui-base-tests', function(Y) {
                     Assert.areEqual(paddedLengths.pre, precision);
                     Assert.areEqual(paddedLengths.post, length);
                 }
+            }
+        },
+
+        'should prefix a string with a given string (does not work if the prefix is already appended) correctly': function() {
+            Assert.isTrue(prefixStrings.length == prefixLessStrings.length && prefixStrings.length == prefixedStrings.length)
+
+            for (var i = 0; i < prefixStrings.length; i++) {
+                Assert.areEqual(Y.Lang.String.prefix(prefixStrings[i], prefixLessStrings[i]), prefixedStrings[i]);
+
             }
         }
     }));
