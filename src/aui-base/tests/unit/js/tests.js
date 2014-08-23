@@ -2,6 +2,30 @@ YUI.add('aui-base-tests', function(Y) {
 
     var escapedEntities = ['&amp;', '&lt;', '&gt;', '&#034;', '&#039;', '&#047;', '&#096;'],
         numbersToPad = [1, 10, 2.5, 6.789, 123.4, 3000.3102, .5, .10001, 500000.0],
+        prefixStrings = [
+            'black',
+            'gold',
+            'john ',
+            'smith',
+            'sword',
+            'word'
+        ],
+        prefixLessStrings = [
+            'smith',
+            'smith',
+            'smith',
+            'ereens',
+            'smith',
+            'smith'
+        ],
+        prefixedStrings = [
+            'blacksmith',
+            'goldsmith',
+            'john smith',
+            'smithereens',
+            'swordsmith',
+            'wordsmith'
+        ],
         symbolEntities = ['&','<','>','"','\'','/','`'],
         uncamelizedStrings = [
             'lorem-ipsum-dolor-sit-amet',
@@ -9,30 +33,6 @@ YUI.add('aui-base-tests', function(Y) {
             'Lorem-Ipsum-doLOR. sit-amet +1',
             'lorem-ipsum-dolor-sit-amet, LOREM-ipsum-D&OLOR',
             'Lorem-ipsum-dolor-sit-amet. lorem-ipsum-dolor-sit-amet, lorem-Ipsum-Dolor-Sit-Amet',
-        ],
-        prefixStrings = [
-            'sword',
-            'word',
-            'gold',
-            'black',
-            'john ',
-            'smith'
-        ],
-        prefixLessStrings = [
-            'smith',
-            'smith',
-            'smith',
-            'blacksmith',
-            'smith ',
-            'ereens'
-        ],
-        prefixedStrings = [
-            'swordsmith',
-            'wordsmith',
-            'goldsmith',
-            'blacksmith',
-            'john smith ',
-            'smithereens'
         ];
 
     var Assert = Y.Assert,
@@ -82,7 +82,7 @@ YUI.add('aui-base-tests', function(Y) {
                     dashCount = 0;
 
                 //find the dash and capitalized indicies
-                for(var j = 0; j < toBeCamelized.length; j++) {
+                for (var j = 0; j < toBeCamelized.length; j++) {
                     character = toBeCamelized[j];
 
                     if (character === '-') {
@@ -134,11 +134,12 @@ YUI.add('aui-base-tests', function(Y) {
         },
 
         'should prefix a string with a given string (does not work if the prefix is already appended) correctly': function() {
-            Assert.isTrue(prefixStrings.length == prefixLessStrings.length && prefixStrings.length == prefixedStrings.length)
+            var prefixStringsLength = prefixStrings.length;
 
-            for (var i = 0; i < prefixStrings.length; i++) {
+            Assert.isTrue((prefixStringsLength == prefixLessStrings.length) && (prefixStringsLength == prefixedStrings.length))
+
+            for (var i = 0; i < prefixStringsLength; i++) {
                 Assert.areEqual(Y.Lang.String.prefix(prefixStrings[i], prefixLessStrings[i]), prefixedStrings[i]);
-
             }
         }
     }));
