@@ -154,7 +154,7 @@ A.mix(DatePickerPopover.prototype, {
             target = event.target,
             activeInput = instance.get('activeInput');
 
-        if (!instance._isActiveInputFocused() && !activeInput.contains(target)) {
+        if (activeInput && (!instance._isActiveInputFocused() && !activeInput.contains(target))) {
 
             instance.hide();
         }
@@ -179,6 +179,11 @@ A.mix(DatePickerPopover.prototype, {
                     node: _DOCUMENT,
                     eventName: 'key',
                     keyCode: 'esc'
+                },
+                {
+                    node: _DOCUMENT,
+                    eventName: 'key',
+                    keyCode: 'tab'
                 }
             ],
             position: 'bottom',
