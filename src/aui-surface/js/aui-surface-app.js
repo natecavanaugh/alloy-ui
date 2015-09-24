@@ -304,6 +304,9 @@ A.SurfaceApp = A.Base.create('surface-app', A.Base, [], {
                 A.log(reason.message, 'info');
                 payload.error = reason;
                 instance._stopPending();
+
+                instance.fire('cancelNavigate', payload);
+
                 throw reason;
             }
         ).thenAlways(
