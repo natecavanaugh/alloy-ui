@@ -257,9 +257,19 @@ var Toggler = A.Component.create({
          * @protected
          */
         destructor: function() {
-            var instance = this;
+            var instance = this,
+                content,
+                wrapper;
 
             instance.get('header').setData('toggler', null);
+
+            if (instance.wrapped) {
+                content = instance.get('content');
+                wrapper = content.get('parentNode');
+
+                wrapper.insert(content, 'before');
+                wrapper.remove();
+            }
 
             (new A.EventHandle(instance._eventHandles)).detach();
         },
@@ -363,42 +373,52 @@ var Toggler = A.Component.create({
                     return expand;
                 }
 
-                var content = instance.get('content');
-
-                var height = instance.getContentHeight();
-                var gutter = instance.contentGutter;
-
-                if (isUndefined(gutter)) {
-                    gutter = instance.contentGutter = toInt(content.getStyle('marginTop'));
-                }
-
-                if (!instance.wrapped) {
-                    content.wrap(TPL_CONTENT_WRAPPER);
-
-                    if (expand) {
-                        content.setStyle('marginTop', -(height + gutter));
-                    }
-
-                    instance.wrapped = true;
-                }
-
-                instance.set('animating', true);
-
-                instance.animate({
-                        marginTop: (expand ? gutter : -(height + gutter)) + 'px'
-                    },
-                    function() {
-                        instance.set('animating', false);
-
-                        instance.set('expanded', expand, payload);
-                    }
-                );
+                instance._animation(expand, payload);
             }
             else {
                 instance.set('expanded', expand, payload);
             }
 
             return expand;
+        },
+
+        /**
+         * Apply animation on `toggle`.
+         *
+         * @method _animation
+         * @param {Boolean} expand
+         * @param {Object} payload
+         * @protected
+         */
+        _animation: function(expand, payload) {
+            var instance = this,
+                content = instance.get('content'),
+                gutter = instance.contentGutter,
+                height = instance.getContentHeight();
+
+            if (isUndefined(gutter)) {
+                gutter = instance.contentGutter = toInt(content.getStyle('marginTop'));
+            }
+
+            if (!instance.wrapped) {
+                instance._uiSetExpandedContent();
+
+                if (expand) {
+                    content.setStyle('marginTop', -(height + gutter));
+                }
+            }
+
+            instance.set('animating', true);
+
+            instance.animate({
+                    marginTop: (expand ? gutter : -(height + gutter)) + 'px'
+                },
+                function() {
+                    instance.set('animating', false);
+
+                    instance.set('expanded', expand, payload);
+                }
+            );
         },
 
         /**
@@ -422,10 +442,29 @@ var Toggler = A.Component.create({
          * @protected
          */
         _uiSetExpanded: function(val) {
-            var instance = this;
+            var instance = this,
+                expanded = instance.get('expanded');
+
+            if (expanded && !instance.wrapped) {
+                instance._uiSetExpandedContent();
+            }
 
             instance.get('content').replaceClass(CSS_TOGGLER_CONTENT_STATE[!val], CSS_TOGGLER_CONTENT_STATE[val]);
             instance.get('header').replaceClass(CSS_TOGGLER_HEADER_STATE[!val], CSS_TOGGLER_HEADER_STATE[val]);
+        },
+
+        /**
+         * Wrap the content HTML if `expanded` attribute is true.
+         *
+         * @method _uiSetExpandedContent
+         * @protected
+         */
+        _uiSetExpandedContent: function() {
+            var instance = this;
+
+            instance.get('content').wrap(TPL_CONTENT_WRAPPER);
+
+            instance.wrapped = true;
         }
 
     }

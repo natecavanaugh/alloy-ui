@@ -28,6 +28,7 @@ var CSS_CONTENT = A.getClassName('image', 'viewer', 'base', 'node', 'content'),
  *
  * @class A.ImageViewerBase
  * @extends A.Widget
+ * @uses A.WidgetResponsive
  * @param {Object} config Object literal specifying widget configuration
  *     properties.
  * @constructor
@@ -114,7 +115,7 @@ A.ImageViewerBase = A.Base.create(
          * @return {Boolean}
          */
         hasNext: function() {
-            return this.get('circular') || this.get('currentIndex') < this.get('sources').length - 1;
+            return this.get('circular') || (this.get('currentIndex') < (this.get('sources').length - 1));
         },
 
         /**
@@ -124,7 +125,7 @@ A.ImageViewerBase = A.Base.create(
          * @return {Boolean}
          */
         hasPrev: function() {
-            return this.get('circular') || this.get('currentIndex') > 0;
+            return this.get('circular') || (this.get('currentIndex') > 0);
         },
 
         /**
@@ -134,11 +135,11 @@ A.ImageViewerBase = A.Base.create(
          */
         next: function() {
             if (this.hasNext()) {
-                if (this.get('currentIndex') === this.get('sources').length - 1) {
+                if (this.get('currentIndex') === (this.get('sources').length - 1)) {
                     this.set('currentIndex', 0);
                 }
                 else {
-                    this.set('currentIndex', this.get('currentIndex') + 1);
+                    this.set('currentIndex', (this.get('currentIndex') + 1));
                 }
             }
         },
@@ -151,10 +152,10 @@ A.ImageViewerBase = A.Base.create(
         prev: function() {
             if (this.hasPrev()) {
                 if (this.get('currentIndex') === 0) {
-                    this.set('currentIndex', this.get('sources').length - 1);
+                    this.set('currentIndex', (this.get('sources').length - 1));
                 }
                 else {
-                    this.set('currentIndex', this.get('currentIndex') - 1);
+                    this.set('currentIndex', (this.get('currentIndex') - 1));
                 }
             }
         },
@@ -231,7 +232,6 @@ A.ImageViewerBase = A.Base.create(
             else {
                 this._syncControlsUI();
             }
-
         },
 
         /**
@@ -281,7 +281,9 @@ A.ImageViewerBase = A.Base.create(
          * @protected
          */
         _getCurrentImage: function() {
-            return this._getCurrentImageContainer().one('.' + CSS_IMAGE);
+            if (this.get('sources').length) {
+                return this._getCurrentImageContainer().one('.' + CSS_IMAGE);
+            }
         },
 
         /**
@@ -534,7 +536,7 @@ A.ImageViewerBase = A.Base.create(
             var currentIndex = this.get('currentIndex'),
                 image;
 
-            if (!this.get('visible')) {
+            if (!this.get('visible') || !this.get('sources').length) {
                 return;
             }
 
@@ -567,11 +569,13 @@ A.ImageViewerBase = A.Base.create(
          * @protected
          */
         _setCurrentIndex: function(val) {
+            var sourcesLength = this.get('sources').length;
+
             if (val === 'rand') {
-                return Math.floor(Math.random() * this.get('sources').length);
+                return Math.floor(Math.random() * sourcesLength);
             }
             else {
-                return Math.max(Math.min(val, this.get('sources').length - 1), 0);
+                return Math.max(Math.min(val, (sourcesLength - 1)), 0);
             }
         },
 

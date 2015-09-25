@@ -548,17 +548,7 @@ var ColorPicker = A.Component.create({
 
             if (!instance._pickerContainer) {
                 var container = new A.Panel({
-                    cssClass: CSS_PANEL,
-                    icons: [
-                        {
-                            icon: 'close',
-                            id: 'close',
-                            handler: {
-                                fn: instance.hide,
-                                context: instance
-                            }
-        }
-       ]
+                    bodyContent: ''
                 }).render(instance.get('contentBox'));
 
                 var bodyNode = container.bodyNode;
@@ -566,6 +556,12 @@ var ColorPicker = A.Component.create({
                 bodyNode.addClass(CSS_CONTAINER);
 
                 instance._pickerContainer = bodyNode;
+
+                container.headerNode.remove();
+
+                var panelBoundingBox = container.get('boundingBox');
+
+                panelBoundingBox.addClass(CSS_PANEL);
             }
         },
 

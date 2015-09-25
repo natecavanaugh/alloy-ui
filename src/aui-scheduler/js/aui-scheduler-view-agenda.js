@@ -255,6 +255,19 @@ var SchedulerAgendaView = A.Component.create({
         },
 
         /**
+         * Contains the function that formats the navigation date.
+         *
+         * @attribute navigationDateFormatter
+         * @type {Function}
+         */
+        navigationDateFormatter: {
+            value: function() {
+                return '';
+            },
+            validator: isFunction
+        },
+
+        /**
          * Contains the collection of strings used to label elements of the UI.
          *
          * @attribute strings
@@ -291,6 +304,19 @@ var SchedulerAgendaView = A.Component.create({
 
             boundingBox.delegate('click', instance._onSchedulerEventClick, '.' + CSS_EVENT, instance);
             boundingBox.delegate('click', instance._onEventsHeaderClick, '.' + CSS_HEADER_EXTRA, instance);
+        },
+
+        /**
+         * Returns the date interval in which this view shows events for.
+         *
+         * @method getDateInterval
+         * @return {Object} Object with 2 keys: startDate and endDate. Undefined
+         *   keys are interpreted as unlimited sides of the interval.
+         */
+        getDateInterval: function() {
+            var interval = SchedulerAgendaView.superclass.getDateInterval.apply(this);
+            delete interval.endDate;
+            return interval;
         },
 
         /**
@@ -399,7 +425,7 @@ var SchedulerAgendaView = A.Component.create({
                                         color: schedulerEvent.get('color'),
                                         content: schedulerEvent.get('content'),
                                         dates: eventsDateFormatter.call(instance, startDate, endDate),
-                                        eventClassName: (startDate.getTime() < today.getTime()) ?
+                                        eventClassName: ((date.getTime() < today.getTime()) || (endDate.getTime() < today.getTime())) ?
                                             CSS_EVENT_PAST : '',
                                         firstClassName: (seIndex === 0) ? CSS_EVENT_FIRST : '',
                                         lastClassName: (seIndex === schedulerEventsLength - 1) ? CSS_EVENT_LAST : ''
@@ -445,23 +471,30 @@ var SchedulerAgendaView = A.Component.create({
 
             scheduler.eachEvent(
                 function(schedulerEvent) {
-                    var startDate = schedulerEvent.get('startDate'),
+                    var endDate = schedulerEvent.get('endDate'),
+                        startDate = schedulerEvent.get('startDate'),
                         visible = schedulerEvent.get('visible'),
                         dayTS;
 
-                    if (!visible ||
-                        (startDate.getTime() < viewDate.getTime())) {
-
+                    if (!visible) {
                         return;
                     }
 
-                    dayTS = DateMath.safeClearTime(startDate).getTime();
+                    var displayDate = startDate;
 
-                    if (!eventsMap[dayTS]) {
-                        eventsMap[dayTS] = [];
+                    while (displayDate.getTime() <= endDate.getTime()) {
+                        if (displayDate.getTime() >= viewDate.getTime()) {
+                            dayTS = DateMath.safeClearTime(displayDate).getTime();
+
+                            if (!eventsMap[dayTS]) {
+                                eventsMap[dayTS] = [];
+                            }
+
+                            eventsMap[dayTS].push(schedulerEvent);
+                        }
+
+                        displayDate = DateMath.add(displayDate, DateMath.DAY, 1);
                     }
-
-                    eventsMap[dayTS].push(schedulerEvent);
                 }
             );
 

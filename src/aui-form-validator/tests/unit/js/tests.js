@@ -7,6 +7,20 @@ YUI.add('aui-form-validator-tests', function(Y) {
     var suite = new Y.Test.Suite('aui-form-validator'),
         formValidator;
 
+    var isImageURL = function(val) {
+        var regex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif))/i;
+        return regex.test(val);
+    };
+
+    Y.FormValidator.addCustomRules(
+        {
+            'imageURL': {
+                condition: isImageURL,
+                errorMessage: 'Please enter a valid URL that points to an image (jpg, jpeg, png, or gif).'
+            }
+        }
+    );
+
     formValidator = new Y.FormValidator({
         boundingBox: '#myForm',
         fieldStrings: {
@@ -31,6 +45,11 @@ YUI.add('aui-form-validator-tests', function(Y) {
                 required: true
             },
             gender: {
+                required: true
+            },
+            'image-url': {
+                custom: true,
+                imageURL: true,
                 required: true
             },
             name: {
@@ -121,6 +140,97 @@ YUI.add('aui-form-validator-tests', function(Y) {
             form.simulate('submit');
 
             Y.Assert.isFalse(validator.hasErrors());
+        },
+
+        /*
+         * Check if validator correctly validates fields with custom rules
+         * @tests AUI-1654
+         */
+        'test custom rules': function() {
+            var form = Y.Node.create('<form><input name="gt50" id="gt50" type="text"></form>'),
+                input = form.one('input'),
+                validator;
+
+            var gt50 = function(val) {
+                return (val >= 50);
+            };
+
+            Y.FormValidator.addCustomRules(
+                {
+                    'greaterThan50': {
+                        condition: gt50,
+                        errorMessage: 'The digit should be >=50'
+                    }
+                }
+            );
+
+            validator = new Y.FormValidator({
+                boundingBox: form,
+                rules: {
+                    gt50: {
+                        custom: true,
+                        greaterThan50: true,
+                        required: true
+                    }
+                }
+            });
+
+            form.simulate('submit');
+
+            Y.Assert.isTrue(validator.hasErrors());
+
+            input.attr('value', '42');
+
+            form.simulate('submit');
+
+            Y.Assert.isTrue(validator.hasErrors());
+
+            input.attr('value', '100');
+
+            form.simulate('submit');
+
+            Y.Assert.isFalse(validator.hasErrors());
+        },
+
+        /*
+         * Check if validator correctly validates fields with optional custom rules
+         * @tests AUI-1958
+         */
+        'test custom optional rules': function() {
+            var form = Y.Node.create('<form><input name="always-fails" id="always-fails" type="text"></form>'),
+                input = form.one('input'),
+                validator;
+
+            Y.FormValidator.addCustomRules(
+                {
+                    'alwaysFailsValidation': {
+                        condition: function() {
+                            return false;
+                        },
+                        errorMessage: 'Give up, there\'s nothing you can do to pass this validation.'
+                    }
+                }
+            );
+
+            validator = new Y.FormValidator({
+                boundingBox: form,
+                rules: {
+                    'always-fails': {
+                        alwaysFailsValidation: true,
+                        custom: true
+                    }
+                }
+            });
+
+            form.simulate('submit');
+
+            Y.Assert.isFalse(validator.hasErrors());
+
+            input.attr('value', 'anything');
+
+            form.simulate('submit');
+
+            Y.Assert.isTrue(validator.hasErrors());
         },
 
         _assertValidatorNextLabel: function(input) {

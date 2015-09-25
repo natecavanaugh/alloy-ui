@@ -1,0 +1,35 @@
+.form-builder-field-list-add-button {
+    background-color: #ecf6fe;
+    border: 1px solid #65b3f0;
+    border-radius: 2px;
+    display: none;
+    margin: 0 auto;
+    opacity: 0.5;
+    text-align: center;
+    width: 92%;
+}
+
+.form-builder-field-list-add-button-label {
+    color: #4a90e2;
+    font-family: "Helvetica Neue";
+    font-size: 11px;
+}
+
+.form-builder-field-list-add-button-visible .form-builder-field-list-add-button {
+    display: block;
+}
+
+.form-builder-field-list-add-container {
+    height: 34px;
+    margin-top: -17px;
+}
+
+.form-builder-field-list-container {
+    padding: 35px 0;
+}
+
+@media (max-width: 768px) {
+    .form-builder-field-list-add-button {
+        margin-top: 0;
+    }
+}

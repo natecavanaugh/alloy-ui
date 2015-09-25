@@ -4,13 +4,16 @@
 
 ## @VERSION@
 
-No registries yet.
+* [AUI-1947](https://issues.liferay.com/browse/AUI-1947) Fix odd behavior on Autosize iframe
 
-## [3.0.0pr1](https://github.com/liferay/alloy-ui/releases/tag/3.0.0pr1)
+## [3.0.1](https://github.com/liferay/alloy-ui/releases/tag/3.0.1)
+
+No changes.
+
+## [3.0.0](https://github.com/liferay/alloy-ui/releases/tag/3.0.0)
 
 * [AUI-1174](https://issues.liferay.com/browse/AUI-1174) Validate source code with JSHint
 * [AUI-1278](https://issues.liferay.com/browse/AUI-1278) A.Plugin.AutosizeIframe.getContentHeight returns wrong content heights
-* [AUI-1273](https://issues.liferay.com/browse/AUI-1273) Describe source code changes in HISTORY.md
 
 ## [2.5.0](https://github.com/liferay/alloy-ui/releases/tag/2.5.0)
 

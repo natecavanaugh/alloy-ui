@@ -5,6 +5,9 @@
     height: 228px;
     position: relative;
 }
+.colorpicker-panel {
+    position: static;
+}
 .colorpicker-canvas {
     background: #f00 url(picker_bg.png);
     background-color: #f00;
