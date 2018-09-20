@@ -359,28 +359,6 @@ var FormValidator = A.Component.create({
         },
 
         /**
-         * List of CSS selectors for targets that will not get validated
-         *
-         * @attribute skipValidationTargetSelectors
-         * @default ['a[class=btn-cancel']
-         */
-        skipValidationTargetSelector: {
-            value: 'a[class~=btn-cancel]'
-        },
-
-        /**
-         * Collection of strings used to label elements of the UI.
-         *
-         * @attribute strings
-         * @type Object
-         */
-        strings: {
-            valueFn: function() {
-                return defaults.STRINGS;
-            }
-        },
-
-        /**
          * Collection of rules to validate fields.
          *
          * @attribute rules
@@ -436,15 +414,25 @@ var FormValidator = A.Component.create({
         },
 
         /**
-         * Defines a container for the stack errors.
+         * List of CSS selectors for targets that will not get validated
          *
-         * @attribute stackErrorContainer
+         * @attribute skipValidationTargetSelectors
+         * @default ['a[class=btn-cancel']
          */
-        stackErrorContainer: {
-            getter: function(val) {
-                return A.Node.create(val).clone();
-            },
-            value: TPL_STACK_ERROR
+        skipValidationTargetSelector: {
+            value: 'a[class~=btn-cancel]'
+        },
+
+        /**
+         * Collection of strings used to label elements of the UI.
+         *
+         * @attribute strings
+         * @type Object
+         */
+        strings: {
+            valueFn: function() {
+                return defaults.STRINGS;
+            }
         },
 
         /**
